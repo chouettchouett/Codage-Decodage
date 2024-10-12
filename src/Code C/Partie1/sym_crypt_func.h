@@ -7,23 +7,21 @@
 char* gen_key(int length);
 
 
-char* xor(char* message, char* key);
+void xor(char* message, char* key);
 
 /*
 * Apply a Xor operation on the "message" using a mask generated with the "key", 
 * the lastest mask_xor mask is visible in the mask.txt file
 */
-char* mask_xor(char* message, char* key);
-
-/*
-* Fetch the last unvisited mask used for the lastest mask_xor function call
-*/
-char* fetch_mask();
+void mask_xor_crypt(char* message);
 
 
-char* cbc_crypt(char* message, char* init_vector, char* key);
+void mask_xor_uncrypt(char* message);
 
 
-char* cbc_uncrypt(char* message, char* init_vector, char* key);
+void cbc_crypt(char* message, char* init_vector, char* key);
+
+
+void cbc_uncrypt(char* message, char* init_vector, char* key);
 
 #endif 
