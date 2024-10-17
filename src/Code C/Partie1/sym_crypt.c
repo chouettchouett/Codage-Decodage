@@ -7,14 +7,13 @@
 int main(int argc, char* argv[]){
     srand( time( NULL ) );
 
-    char* message = malloc(sizeof(char)*strlen("Bonjour tout le monde, comment allez-vous ?"));
-    message = "Bonjour tout le monde, comment allez-vous ?";
+    char message[8] = "Bonjour";
 
-    printf("%s\n", message);
+    printf("Initial message : %s\n", message);
     char* key = gen_key(16);
-    printf("key generated = %s , length = %d\n", key, (int)strlen(key));
+    printf("Key generated = %s\n", key);
     xor(message, key);
-    printf("%s\n", message);
+
     xor(message, key);
-    printf("%s\n", message);
+    printf("Decrypted message : %s\n", message);
 }

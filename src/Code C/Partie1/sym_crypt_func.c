@@ -7,7 +7,6 @@
 const char* ALPHA_NUM = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const int ALPHA_NUM_LENGTH = 62;
 
-const int MASK_SIZE = 16;
 const char* MASK_PATH = "mask.txt";
 
 // longueur en octet de l'indicateur de fin de fichier stockant la longueur du dernier mask
@@ -16,9 +15,9 @@ const int END_INDICATOR_LENGTH = 4;
 
 char* gen_key(int length){
     char* key = malloc(sizeof(char)*length);
-    for(int i=0; i<length; i++){
+    for(int i=0; i<length; i++)
         key[i] = ALPHA_NUM[rand() % ALPHA_NUM_LENGTH];
-    }
+    
     return key;
 }
 
@@ -26,10 +25,9 @@ void xor(char* message, char* key){
     int key_length = strlen(key);
     int message_length = strlen(message);
     
-    for(int i=0; i<message_length; i++){
-        printf("i=%d\n", i);
+    for(int i=0; i<message_length; i++)
         message[i] = (char)(message[i]^key[i%key_length]);
-    }
+    
 }
 
 void save_mask(char* mask){
