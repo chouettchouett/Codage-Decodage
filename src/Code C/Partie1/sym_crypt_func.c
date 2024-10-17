@@ -4,13 +4,12 @@
 #include <string.h>
 #include <fcntl.h>
 
+
 const char* ALPHA_NUM = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
 const int ALPHA_NUM_LENGTH = 62;
 
 const char* MASK_PATH = "mask.txt";
-
-// longueur en octet de l'indicateur de fin de fichier stockant la longueur du dernier mask
-const int END_INDICATOR_LENGTH = 4; 
+const int MAX_MASK_LENGTH = 256; 
 
 
 char* gen_key(int length){
@@ -23,12 +22,14 @@ char* gen_key(int length){
 
 void xor(char* message, char* key){
     int key_length = strlen(key);
+    if(key_length==0) fprintf(stderr, "xor : key length 0\n");
     int message_length = strlen(message);
     
     for(int i=0; i<message_length; i++)
         message[i] = (char)(message[i]^key[i%key_length]);
-    
 }
+
+#pragma region MASK_UTILITIES
 
 void save_mask(char* mask){
     int fd = open(MASK_PATH, O_WRONLY | O_APPEND);
@@ -36,10 +37,6 @@ void save_mask(char* mask){
     // Ecriture du mask
     write(fd, mask, strlen(mask));
 
-    // Ajout d'un indicateur de la longueur du dernier mask stocké
-    char mask_length[END_INDICATOR_LENGTH];
-    sprintf(mask_length, "%d", (int)strlen(mask));
-    write(fd, mask_length, END_INDICATOR_LENGTH);
     close(fd);
 }
 
@@ -48,20 +45,9 @@ char* fetch_mask(){
     // Ouverture du fichier
     FILE* fstream = fopen(MASK_PATH, "r+");
 
-    // Vérification fichier vide (aucun mask)
-    if(EOF)
-        return NULL;
-
-    // Récupération de la longueur du dernier mask
-    fseek(fstream, END_INDICATOR_LENGTH, SEEK_END);
-    char* indicator;
-    fgets(indicator, END_INDICATOR_LENGTH, fstream);
-    int last_mask_length = atoi(indicator);
-
     // Lecture du dernier mask
-    fseek(fstream, END_INDICATOR_LENGTH+last_mask_length, SEEK_END);
     char* mask;
-    fgets(mask, last_mask_length, fstream);
+    fscanf(fstream, "%s", mask);
 
     // Fermeture du fichier
     fclose(fstream);
@@ -73,27 +59,45 @@ void mask_xor_crypt(char* message){
 
     // Génération du mask
     char* mask = gen_key(strlen(message));
-    
+    printf("\nmask genere...\n");
     // Cryptage du message en utilisant le mask
     xor(message, mask);
-
+    printf("xor applique...\n");
     // Stockage du mask
     save_mask(mask);
-    
+    printf("mask stocke : %s ... \n", mask);
     // Déallocation du mask
     free(mask);
+    printf("mask_xor_crypt SUCCESS \n\n");
 }
 
-void mask_xor_uncrypt(char* message){
+void mask_xor_decrypt(char* message){
 
     // Récupération du dernier mask stocké
     char* mask = fetch_mask();
-    
+    printf("mask recupere : %s ...\n", mask);
     // Decryptage du message en utilisant le mask
     xor(message, mask);
-    
+    printf("xor applique...\n");
     // Déallocation du mask
     free(mask);
+    printf("mask_xor_decrypt SUCCESS \n\n");
+}
+
+#pragma endregion MASK
+
+void mask_xor(char* message, int operation){
+
+    if( operation==M_CRYPT ){
+        mask_xor_crypt(message);
+    }
+    else if( operation==M_DECRYPT ){
+        mask_xor_decrypt(message);
+    }
+    else{
+        fprintf(stderr, "mask_xor : Wrong mask operator.");
+    }
+    
 }
 
 void cbc_crypt(char* message, char* init_vector, char* key){

@@ -10,10 +10,8 @@ int main(int argc, char* argv[]){
     char message[8] = "Bonjour";
 
     printf("Initial message : %s\n", message);
-    char* key = gen_key(16);
-    printf("Key generated = %s\n", key);
-    xor(message, key);
+    mask_xor(message, M_CRYPT);
 
-    xor(message, key);
+    mask_xor(message, M_DECRYPT);
     printf("Decrypted message : %s\n", message);
 }

@@ -1,3 +1,0 @@
-mask jetable 1
-mask jetable 2
-...
