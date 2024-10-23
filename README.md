@@ -18,13 +18,13 @@ CENDREZ Enzo             => Partie 1
 
 ## Makefile
 
-   ### Utilisation :
+   ### Utilisation
 Commandes :
 - `make` - Pour compiler le programme complet
 - `make partX` - Pour compiler la partie X du programme et la tester
 - `make clean` - Pour supprimer les .o et exécutables
 
-### Organisation :
+### Organisation
 Pour l'instant, chaque partie possède :
  - **main_partX.c** : qui servira lorsque l'on compile seulement cette partie pour la tester. Vous y mettez tout ce que vous voulez :D
  - **partX.c** + **partX.h** : qui contiendront les fonctions nécessaires au fonctionnement du programme principal. C'est ce .h qui sera inclus dans main.c (avec celui des autres parties).
