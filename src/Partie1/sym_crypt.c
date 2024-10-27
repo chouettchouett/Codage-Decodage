@@ -10,8 +10,9 @@ int main(int argc, char* argv[]){
     char message[8] = "Bonjour";
 
     printf("Initial message : %s\n", message);
-    mask_xor(message, M_CRYPT);
-
-    mask_xor(message, M_DECRYPT);
+    mask_xor_crypt(message);
+    printf("Crypting OK\n");
+    mask_xor_uncrypt(message);
+    printf("Uncrypting OK\n");
     printf("Decrypted message : %s\n", message);
 }
