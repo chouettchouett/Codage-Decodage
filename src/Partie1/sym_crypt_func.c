@@ -80,7 +80,6 @@ int save_mask(char* mask, int mask_length){
         return -1;
     }
 
-    printf("mask = %s\n", mask);
     close(fd);
     return 0;
 }
@@ -88,30 +87,28 @@ int save_mask(char* mask, int mask_length){
 char* fetch_mask(){
 
     // Ouverture du fichier
-    int fd = open(MASK_PATH, O_RDWR);
+    int fd = open(MASK_PATH, O_RDONLY);
     if(fd==-1){
         perror("open");
         return NULL;
     }
 
     // Initialisation
-    int i=0;
-    int mask_size = 0;
     char curNumber;
     if(read(fd, &curNumber, sizeof(char)) ==-1){
         perror("read");
         return NULL;
     }
+    int mask_size = curNumber-'0';
     
     // Récupération de l'indicateur de taille du mask
-    do{
-        mask_size += (int)(( curNumber*(pow(10, 10*i)) ) - '0');
+    for(int i=1; i<MASK_CHAR_LENGTH; i++){
         if(read(fd, &curNumber, sizeof(char)) ==-1){
             perror("read");
             return NULL;
         }
-        i++;
-    }while(i<5);
+        mask_size += (int)( (curNumber-'0')*(pow(10, i)) );
+    }
     
     // Lecture du mask
     char* mask = malloc(sizeof(char)*(mask_size+1));
@@ -119,18 +116,12 @@ char* fetch_mask(){
         perror("read");
         return NULL;
     }
-    
+
     // Fermeture du fichier
     if(close(fd) ==-1){
         perror("close");
         return NULL;
     }
-    printf("mask = %s\n\n", mask);
-
-    char text[mask_size+MASK_CHAR_LENGTH+1];
-    read(open(MASK_PATH, O_RDONLY), &text, sizeof(char)*mask_size+MASK_CHAR_LENGTH);
-    for(int i=0; i<mask_size+MASK_CHAR_LENGTH; i++)
-        printf("verify read char = %d\n", text[i]);
 
     return mask;
 }
@@ -322,7 +313,7 @@ int cbc_crypt(char* message_filepath, char* init_vector, char* encrypted_filepat
     int message_fd;
     int encrypted_fd;
     int mask_fd;
-    if( ((message_fd=open(message_filepath, O_RDWR))==-1)
+    if( ((message_fd=open(message_filepath, O_RDONLY))==-1)
         | ((encrypted_fd = open(encrypted_filepath, O_WRONLY | O_APPEND | O_CREAT ))==-1) 
         | ((mask_fd = open(MASK_PATH, O_WRONLY | O_APPEND | O_CREAT ))==-1) ){
         perror("open");
@@ -350,9 +341,9 @@ int cbc_uncrypt(char* encrypted_filepath, char* init_vector, char* message_filep
     int encrypted_fd;
     int message_fd;
     int mask_fd;
-    if( ((encrypted_fd = open(encrypted_filepath, O_WRONLY | O_APPEND | O_CREAT ))==-1)
-        | ((message_fd=open(message_filepath, O_RDONLY))==-1) 
-        | ((mask_fd = open(MASK_PATH, O_WRONLY | O_APPEND | O_CREAT ))==-1) ){
+    if( ((encrypted_fd = open(encrypted_filepath, O_RDONLY))==-1)
+        | ((message_fd=open(message_filepath, O_WRONLY | O_APPEND | O_CREAT ))==-1) 
+        | ((mask_fd = open(MASK_PATH, O_RDONLY))==-1) ){
         perror("open");
         fprintf(stderr, "cbc_uncrypt : went wrong\n");
         return -1;
