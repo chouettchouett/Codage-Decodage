@@ -181,7 +181,7 @@ int mask_xor_uncrypt(char* message){
 
 void fill_str(char* message, int startIndex){
     for(int i=startIndex; i<CBC_MASK_LENGTH; i++)
-        message[i] = '0';
+        message[i] = ' ';
 }
 
 int save_cbc_mask(char* mask, int mask_fd){
