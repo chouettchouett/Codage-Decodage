@@ -6,6 +6,8 @@
 #include <assert.h>
 #include <sys/stat.h>
 #include <math.h>
+#include <unistd.h>       
+#include <sys/types.h>
 
 #define ALPHA_NUM "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #define ALPHA_NUM_LENGTH strlen(ALPHA_NUM)-1
