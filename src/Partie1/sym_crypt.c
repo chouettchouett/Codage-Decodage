@@ -11,7 +11,8 @@ int main(int argc, char* argv[]){
     char encrypted_message[] = "encrypted_message.txt";
     char uncrypted_message[] = "uncrypted_message.txt";
 
-    char* vector = gen_key(4);
+    char vector[] = "PeutetrequeNONon";
+    printf("vector=%s\n", vector);
 
     cbc_crypt(message_filepath, vector, encrypted_message);
     printf("Crypting OK\n");
