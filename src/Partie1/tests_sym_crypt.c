@@ -12,6 +12,14 @@
         exit(EXIT_FAILURE); \
     }
 
+void unpadding(char* message){
+    int i = strlen(message);
+    while(message[i]!=' ' & (i>0)){
+        message[i]='\0';
+        i--;
+    }
+}
+
 void test_xor() {
     char message[] = "Hello World!";
     char* key = gen_key(strlen(message));
