@@ -20,7 +20,7 @@ int main() {
     
     printf("\nTous les tests sont réussis.\n");
 
-    char message_filepath[] = "message.txt";
+    char message_filepath[] = "data/message.txt";
     char encrypted_message[] = "encrypted_message.txt";
     char uncrypted_message[] = "uncrypted_message.txt";
 
