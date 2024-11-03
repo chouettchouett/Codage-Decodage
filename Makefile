@@ -57,4 +57,4 @@ $(EXEC_PART3): $(OBJ_PART3)
 .PHONY: clean
 
 clean:
-	@rm -rf obj/ $(EXEC) $(EXEC_PART1) $(EXEC_PART2) $(EXEC_PART3)
+	@rm -rf obj/ $(EXEC) $(EXEC_PART1) $(EXEC_PART2) $(EXEC_PART3) encrypted_message.txt mask.txt uncrypted_message.txt
