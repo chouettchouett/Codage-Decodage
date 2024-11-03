@@ -25,7 +25,7 @@ char* gen_key(int length){
 
     // remplie chaque case mémoire de key d'un élément aléatoire de ALPHA_NUM
     for(int i=0; i<length; i++)
-        key[i] = ALPHA_NUM[rand() % ALPHA_NUM_LENGTH];
+        key[i] = ALPHA_NUM[rand() % ALPHA_NUM_LENGTH] + '0';
     
     return key;
 }
@@ -66,8 +66,8 @@ int save_mask(char* mask, int mask_length){
     int curMaskLength = mask_length;
     
     for(int i=0; i<MASK_CHAR_LENGTH; i++){
-        curMaskLengthChar = (curMaskLength%10);
-        curMaskLength = (curMaskLength/10);
+        curMaskLengthChar = (curMaskLength%10)+'0';
+        curMaskLength = (int)(curMaskLength/10);
         if(write(fd, &curMaskLengthChar, sizeof(char))==-1){
             perror("write");
             return -1;
@@ -107,7 +107,7 @@ char* fetch_mask(){
             perror("read");
             return NULL;
         }
-        mask_size += (int)( (curNumber)*(pow(10, i)) );
+        mask_size += (int)( (curNumber-'0')*(pow(10, i)) );
     }
     
     // Lecture du mask
@@ -205,15 +205,16 @@ char* fetch_cbc_mask(int mask_fd){
 }
 
 int mask_xor_cbc_crypt(char* message, int mask_fd){
+    
+    int length = strlen(message);
 
     // Génération du mask
-    char* mask = gen_key(CBC_MASK_LENGTH);
+    char* mask = gen_key(length);
     
     // Cryptage du message en utilisant le mask
     if(xor(message, mask)==-1)
         return -1;
 
-    printf("message=%s, mask=%s\n", message, mask);
     // Stockage du mask
     if(save_cbc_mask(mask, mask_fd)==-1)
         return -1;
@@ -244,36 +245,30 @@ int mask_xor_cbc_uncrypt(char* message, int mask_fd){
 int cbc_crypt_rec(int message_fd, char* vector, int encrypted_fd, int mask_fd){
 
     char message[CBC_MASK_LENGTH+1];
-    message[CBC_MASK_LENGTH] ='\0';
-
     // Sachant que l'on garde le même file descriptor, le message lu sera bien le suivant
+    
     int message_length;
     if((message_length = read(message_fd, message, sizeof(char)*CBC_MASK_LENGTH))==-1){
         perror("read");
         return -1;
     }
-    printf("message=%s, message_length=%d\n", message, message_length);
 
     if(message_length!=0){ // !condition d'arrêt
         // Remplit le message de '0' si celui-ci n'est pas assez long
         if(message_length<CBC_MASK_LENGTH)
             fill_str(message, message_length);
-        assert(strlen(message)==CBC_MASK_LENGTH);
 
         // Cryptage
         if(xor(message, vector)==-1) return -1;
-    for(int x=0; x<CBC_MASK_LENGTH; x++)
-        printf("%2d=%3d ", x, message[x]);
-    printf("\n");
         if(mask_xor_cbc_crypt(message, mask_fd)==-1) return -1;
         if(write(encrypted_fd, message, sizeof(char)*CBC_MASK_LENGTH)==-1){
             perror("write");
             return -1;
         }
-    printf("vector=%s\n", vector);
 
         // Décryptage
-        return cbc_crypt_rec(message_fd, message, encrypted_fd, mask_fd);
+        if(message_length>=CBC_MASK_LENGTH)
+            return cbc_crypt_rec(message_fd, message, encrypted_fd, mask_fd);
     }
     return 0;
 }
@@ -281,15 +276,13 @@ int cbc_crypt_rec(int message_fd, char* vector, int encrypted_fd, int mask_fd){
 int cbc_uncrypt_rec(int encrypted_fd, char* vector, int message_fd, int mask_fd){
     
     char message[CBC_MASK_LENGTH+1];
-    message[CBC_MASK_LENGTH] = '\0';
-
     // Lecture de la suite du message sur le même file_descriptor
+    
     int message_length;
     if((message_length = read(encrypted_fd, &message, sizeof(char)*CBC_MASK_LENGTH))==-1){
         perror("read");
         return -1;
     }
-    printf("message=%s, message_length=%d\n", message, message_length);
 
     if(message_length!=0){ // !condition d'arrêt
         // Verification d'erreur de stockage, car les blocs ont étés remplis
@@ -323,7 +316,7 @@ int cbc_crypt(char* message_filepath, char* init_vector, char* encrypted_filepat
     remove(encrypted_filepath);
     fclose(fopen(encrypted_filepath, "a"));
     chmod(encrypted_filepath, S_IRWXU);
-    
+
     int message_fd;
     int encrypted_fd;
     int mask_fd;
@@ -334,8 +327,6 @@ int cbc_crypt(char* message_filepath, char* init_vector, char* encrypted_filepat
         fprintf(stderr, "cbc_crypt : went wrong\n");
         return -1;
     }
-
-    fill_str(init_vector, strlen(init_vector));
 
     if(cbc_crypt_rec(message_fd, init_vector, encrypted_fd, mask_fd)==-1){
         fprintf(stderr, "cbc_crypt : went wrong\n");
@@ -368,8 +359,6 @@ int cbc_uncrypt(char* encrypted_filepath, char* init_vector, char* uncrypted_fil
         fprintf(stderr, "cbc_uncrypt : went wrong\n");
         return -1;
     }
-
-    fill_str(init_vector, strlen(init_vector));
 
     if(cbc_uncrypt_rec(encrypted_fd, init_vector, message_fd, mask_fd)==-1){
         fprintf(stderr, "cbc_uncrypt : went wrong\n");
