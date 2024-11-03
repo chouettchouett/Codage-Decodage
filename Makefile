@@ -5,7 +5,7 @@ EXEC_PART3 = break_code
 
 CC = gcc
 CFLAGS = -std=c99 -Wextra -Wall -pedantic
-LDFLAGS =
+LDFLAGS = -lm
 
 SRC = $(wildcard src/*.c) $(SRC_PART1) $(SRC_PART2) $(SRC_PART3)
 SRC_PART1 = $(wildcard src/Partie1/*.c)
