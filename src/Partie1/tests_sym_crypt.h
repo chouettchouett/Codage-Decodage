@@ -7,7 +7,7 @@ void test_mask_xor_crypt();
 
 void unpadding(char *message);
 
-void display_and_unpad(FILE *f_dec, char *buffer);
+void afficher_et_unppad(FILE *f_dec, char *buffer);
 
 void test_cbc_crypt();
 
