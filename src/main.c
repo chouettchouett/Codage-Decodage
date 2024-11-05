@@ -7,7 +7,4 @@
 
 int main () {
     printf("Main principal\n");
-    fonction_part1();
-    fonction_part2();
-    fonction_part3();
 }

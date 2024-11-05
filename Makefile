@@ -7,7 +7,7 @@ CC = gcc
 CFLAGS = -std=c99 -Wextra -Wall -pedantic
 LDFLAGS = -lm
 
-SRC = $(wildcard src/*.c) $(SRC_PART1) $(SRC_PART2) $(SRC_PART3)
+SRC = $(wildcard src/*.c) $(filter-out src/Partie1/sym_crypt.c src/Partie2/main_part2.c src/Partie3/main_part3.c, $(SRC_PART1) $(SRC_PART2) $(SRC_PART3))
 SRC_PART1 = $(wildcard src/Partie1/*.c)
 SRC_PART2 = $(wildcard src/Partie2/*.c)
 SRC_PART3 = $(wildcard src/Partie3/*.c)
