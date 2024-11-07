@@ -6,3 +6,4 @@ uncrypted_message.txt
 encrypted_message.txt
 mask.txt
 /obj/
+/tmp/
