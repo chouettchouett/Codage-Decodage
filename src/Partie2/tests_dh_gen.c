@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "dh_gen_group.h"
+#include "tests_dh_gen.h"
 
 // Macro d'assertion pour afficher les erreurs spécifiques
 #define assert_message(condition, message) \
