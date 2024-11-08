@@ -32,3 +32,18 @@ int main(int argc, char **argv) {
 
     return 0;
 }
+
+/*#include <stdio.h>
+#include "tests_dh_gen.h"
+
+// Fonction principale pour lancer tous les tests
+int main() {
+    test_option_o();
+    test_option_o_no_filename();
+    test_option_h();
+    test_prime_sophie_germain();
+    test_generator();
+
+    printf("Tous les tests ont été exécutés avec succès.\n");
+    return 0;
+} */
