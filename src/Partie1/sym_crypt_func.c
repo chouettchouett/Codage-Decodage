@@ -49,6 +49,42 @@ int xor(char* message, char* key){
 #pragma region FILE_UTILITIES
 
 #define MASK_CHAR_LENGTH 5
+
+int save_length_indicator(int fd, int length, int value){
+    char curMaskLengthChar;
+    int curMaskLength = value;
+    
+    for(int i=0; i<length; i++){
+        curMaskLengthChar = (curMaskLength%10);
+        curMaskLength = (curMaskLength/10);
+        if(write(fd, &curMaskLengthChar, sizeof(char))==-1){
+            perror("write");
+            return -1;
+        }
+    }
+    return 0;
+}
+
+int fetch_length_indicator(int fd, int length, int* value){
+    char curNumber;
+    if(read(fd, &curNumber, sizeof(char)) ==-1){
+        perror("read");
+        return -1;
+    }
+    int mask_size = curNumber-'0';
+    
+    // Récupération de l'indicateur de taille du mask
+    for(int i=1; i<length; i++){
+        if(read(fd, &curNumber, sizeof(char)) ==-1){
+            perror("read");
+            return -1;
+        }
+        mask_size += (int)( (curNumber-'0')*(pow(10, i)) );
+    }
+    *value = mask_size;
+    return 0;
+}
+
 int save_mask(char* mask, int mask_length){
 
     remove(MASK_PATH);
@@ -62,17 +98,7 @@ int save_mask(char* mask, int mask_length){
     }
 
     // Ecriture d'un indicateur de la longueur du mask
-    char curMaskLengthChar;
-    int curMaskLength = mask_length;
-    
-    for(int i=0; i<MASK_CHAR_LENGTH; i++){
-        curMaskLengthChar = (curMaskLength%10);
-        curMaskLength = (curMaskLength/10);
-        if(write(fd, &curMaskLengthChar, sizeof(char))==-1){
-            perror("write");
-            return -1;
-        }
-    }
+    if(save_length_indicator(fd, MASK_CHAR_LENGTH, mask_length)==-1) return -1;
 
     // Ecriture du mask lui même
     if(write(fd, mask, sizeof(char)*mask_length) ==-1){
@@ -93,22 +119,9 @@ char* fetch_mask(){
         return NULL;
     }
 
-    // Initialisation
-    char curNumber;
-    if(read(fd, &curNumber, sizeof(char)) ==-1){
-        perror("read");
-        return NULL;
-    }
-    int mask_size = curNumber-'0';
-    
-    // Récupération de l'indicateur de taille du mask
-    for(int i=1; i<MASK_CHAR_LENGTH; i++){
-        if(read(fd, &curNumber, sizeof(char)) ==-1){
-            perror("read");
-            return NULL;
-        }
-        mask_size += (int)( (curNumber)*(pow(10, i)) );
-    }
+    // Récupération de la longueur du mask
+    int mask_size;
+    if(fetch_length_indicator(fd, MASK_CHAR_LENGTH, &mask_size)==-1) return NULL;
     
     // Lecture du mask
     char* mask = malloc(sizeof(char)*(mask_size+1));
@@ -204,16 +217,20 @@ char* fetch_cbc_mask(int mask_fd){
     return mask;
 }
 
+
+void xor_length(int length, char* message, char* key){
+    for(int i=0; i<length; i++)
+        message[i] = message[i]^key[i];
+}
+
 int mask_xor_cbc_crypt(char* message, int mask_fd){
 
     // Génération du mask
     char* mask = gen_key(CBC_MASK_LENGTH);
     
     // Cryptage du message en utilisant le mask
-    if(xor(message, mask)==-1)
-        return -1;
+    xor_length(CBC_MASK_LENGTH, message, mask);
 
-    printf("message=%s, mask=%s\n", message, mask);
     // Stockage du mask
     if(save_cbc_mask(mask, mask_fd)==-1)
         return -1;
@@ -232,8 +249,7 @@ int mask_xor_cbc_uncrypt(char* message, int mask_fd){
         return -1;
 
     // Decryptage du message en utilisant le mask
-    if(xor(message, mask) ==-1)
-        return -1;
+    xor_length(CBC_MASK_LENGTH, message, mask);
 
     // Déallocation du mask
     free(mask);
@@ -252,25 +268,20 @@ int cbc_crypt_rec(int message_fd, char* vector, int encrypted_fd, int mask_fd){
         perror("read");
         return -1;
     }
-    printf("message=%s, message_length=%d\n", message, message_length);
+    printf("message_length=%d\n", message_length);
 
     if(message_length!=0){ // !condition d'arrêt
         // Remplit le message de '0' si celui-ci n'est pas assez long
         if(message_length<CBC_MASK_LENGTH)
             fill_str(message, message_length);
-        assert(strlen(message)==CBC_MASK_LENGTH);
 
         // Cryptage
-        if(xor(message, vector)==-1) return -1;
-    for(int x=0; x<CBC_MASK_LENGTH; x++)
-        printf("%2d=%3d ", x, message[x]);
-    printf("\n");
+        xor_length(CBC_MASK_LENGTH, message, vector);
         if(mask_xor_cbc_crypt(message, mask_fd)==-1) return -1;
         if(write(encrypted_fd, message, sizeof(char)*CBC_MASK_LENGTH)==-1){
             perror("write");
             return -1;
         }
-    printf("vector=%s\n", vector);
 
         // Décryptage
         return cbc_crypt_rec(message_fd, message, encrypted_fd, mask_fd);
@@ -278,6 +289,7 @@ int cbc_crypt_rec(int message_fd, char* vector, int encrypted_fd, int mask_fd){
     return 0;
 }
 
+/*
 int cbc_uncrypt_rec(int encrypted_fd, char* vector, int message_fd, int mask_fd){
     
     char message[CBC_MASK_LENGTH+1];
@@ -289,28 +301,62 @@ int cbc_uncrypt_rec(int encrypted_fd, char* vector, int message_fd, int mask_fd)
         perror("read");
         return -1;
     }
-    printf("message=%s, message_length=%d\n", message, message_length);
+    printf("message_length=%d\n", message_length);
 
-    if(message_length!=0){ // !condition d'arrêt
-        // Verification d'erreur de stockage, car les blocs ont étés remplis
-        assert(message_length==CBC_MASK_LENGTH);
+    if(message_length==0){ // Condition d'arrêt
+        lseek(encrypted_fd, SEEK_CUR, 1);
+        message_length = read(encrypted_fd, &message, sizeof(char)*CBC_MASK_LENGTH);
+        printf("message_length_last=%d\n", message_length);
+        return 0;
+    }
+    
+    // Stockage temporaire du vecteur pour placer l'appel récursif en fin de programme
+    char encrypted_message[CBC_MASK_LENGTH+1];
+    strcpy(encrypted_message, message);
 
-        // Stockage temporaire du vecteur pour placer l'appel récursif en fin de programme
-        char encrypted_message[CBC_MASK_LENGTH+1];
-        strcpy(encrypted_message, message);
+    // Décryptage
+    if(mask_xor_cbc_uncrypt(message, mask_fd)==-1) return -1;
+    xor_length(CBC_MASK_LENGTH, message, vector);
+    if(write(message_fd, message, sizeof(char)*CBC_MASK_LENGTH)==-1 ){
+        perror("write");
+        return -1;
+    }
+    
+    return cbc_uncrypt_rec(encrypted_fd, encrypted_message, message_fd, mask_fd);
+    
+}
+*/
+int cbc_uncrypt_rec(FILE* encrypted_fd, char* vector, int message_fd, int mask_fd){
+    char message[CBC_MASK_LENGTH+1];
+    message[CBC_MASK_LENGTH] = '\0';
 
-        // Décryptage
-        if(mask_xor_cbc_uncrypt(message, mask_fd)==-1) return -1;
-        if(xor(message, vector)==-1) return -1;
+    char* mask = fetch_cbc_mask(mask_fd);
+    int c = getc(encrypted_fd);
+    int decail=0;
+    char encrypted_message[CBC_MASK_LENGTH+1];
+    strcpy(encrypted_message, vector);
+
+    while(!feof(encrypted_fd)){
+        
+        while(decail<16){
+            message[decail] = c^mask[decail]; // xor mask
+            message[decail] = message[decail]^encrypted_message[decail]; // xor vector
+
+            encrypted_message[decail] = c;
+
+            c = getc(encrypted_fd);
+            decail++;
+        }
+
+        decail=0;
+        mask = fetch_cbc_mask(mask_fd);
         if(write(message_fd, message, sizeof(char)*CBC_MASK_LENGTH)==-1 ){
             perror("write");
             return -1;
         }
-
-        // Appel récursif
-        return cbc_uncrypt_rec(encrypted_fd, encrypted_message, message_fd, mask_fd);
     }
     return 0;
+    
 }
 
 #pragma endregion CBC_UTILITIES
@@ -358,11 +404,13 @@ int cbc_uncrypt(char* encrypted_filepath, char* init_vector, char* uncrypted_fil
     fclose(fopen(uncrypted_filepath, "a"));
     chmod(uncrypted_filepath, S_IRWXU);
 
-    int encrypted_fd;
+    //int encrypted_fd;
+    FILE* encrypted_fd;
     int message_fd;
     int mask_fd;
-    if( ((encrypted_fd = open(encrypted_filepath, O_RDONLY))==-1)
-        | ((message_fd=open(uncrypted_filepath, O_WRONLY | O_APPEND | O_CREAT ))==-1) 
+    /*((*/encrypted_fd=/*open*/fopen(encrypted_filepath, "r"/*O_RDONLY*/);/*)==-1)*/
+    if(
+        /*| */((message_fd=open(uncrypted_filepath, O_WRONLY | O_APPEND | O_CREAT ))==-1) 
         | ((mask_fd = open(MASK_PATH, O_RDONLY))==-1) ){
         perror("open");
         fprintf(stderr, "cbc_uncrypt : went wrong\n");
@@ -376,12 +424,12 @@ int cbc_uncrypt(char* encrypted_filepath, char* init_vector, char* uncrypted_fil
         return -1;
     }
 
-    if( (close(encrypted_fd)==-1) 
+    if( (/*close*/fclose(encrypted_fd)==-1) 
         | (close(message_fd)==-1) ){
         perror("close\n");
         fprintf(stderr, "cbc_uncrypt : went wrong\n");
         return -1;
     }
 
-    return 0;
+    return 0;   
 }
