@@ -25,7 +25,7 @@ char* gen_key(int length){
 
     // remplie chaque case mémoire de key d'un élément aléatoire de ALPHA_NUM
     for(int i=0; i<length; i++)
-        key[i] = ALPHA_NUM[rand() % ALPHA_NUM_LENGTH];
+        key[i] = ALPHA_NUM[abs((int)(rand() % ALPHA_NUM_LENGTH))];
     
     return key;
 }
@@ -218,151 +218,11 @@ char* fetch_cbc_mask(int mask_fd){
 }
 
 
-void xor_length(int length, char* message, char* key){
-    for(int i=0; i<length; i++)
-        message[i] = message[i]^key[i];
-}
-
-int mask_xor_cbc_crypt(char* message, int mask_fd){
-
-    // Génération du mask
-    char* mask = gen_key(CBC_MASK_LENGTH);
-    
-    // Cryptage du message en utilisant le mask
-    xor_length(CBC_MASK_LENGTH, message, mask);
-
-    // Stockage du mask
-    if(save_cbc_mask(mask, mask_fd)==-1)
-        return -1;
-
-    // Déallocation du mask
-    free(mask);
-
-    return 0;
-}
-
-int mask_xor_cbc_uncrypt(char* message, int mask_fd){
-    
-    // Récupération du dernier mask stocké
-    char* mask = fetch_cbc_mask(mask_fd);
-    if(mask == NULL)
-        return -1;
-
-    // Decryptage du message en utilisant le mask
-    xor_length(CBC_MASK_LENGTH, message, mask);
-
-    // Déallocation du mask
-    free(mask);
-
-    return 0;
-}
-
-int cbc_crypt_rec(int message_fd, char* vector, int encrypted_fd, int mask_fd){
-
-    char message[CBC_MASK_LENGTH+1];
-    message[CBC_MASK_LENGTH] ='\0';
-
-    // Sachant que l'on garde le même file descriptor, le message lu sera bien le suivant
-    int message_length;
-    if((message_length = read(message_fd, message, sizeof(char)*CBC_MASK_LENGTH))==-1){
-        perror("read");
-        return -1;
-    }
-    printf("message_length=%d\n", message_length);
-
-    if(message_length!=0){ // !condition d'arrêt
-        // Remplit le message de '0' si celui-ci n'est pas assez long
-        if(message_length<CBC_MASK_LENGTH)
-            fill_str(message, message_length);
-
-        // Cryptage
-        xor_length(CBC_MASK_LENGTH, message, vector);
-        if(mask_xor_cbc_crypt(message, mask_fd)==-1) return -1;
-        if(write(encrypted_fd, message, sizeof(char)*CBC_MASK_LENGTH)==-1){
-            perror("write");
-            return -1;
-        }
-
-        // Décryptage
-        return cbc_crypt_rec(message_fd, message, encrypted_fd, mask_fd);
-    }
-    return 0;
-}
-
-/*
-int cbc_uncrypt_rec(int encrypted_fd, char* vector, int message_fd, int mask_fd){
-    
-    char message[CBC_MASK_LENGTH+1];
-    message[CBC_MASK_LENGTH] = '\0';
-
-    // Lecture de la suite du message sur le même file_descriptor
-    int message_length;
-    if((message_length = read(encrypted_fd, &message, sizeof(char)*CBC_MASK_LENGTH))==-1){
-        perror("read");
-        return -1;
-    }
-    printf("message_length=%d\n", message_length);
-
-    if(message_length==0){ // Condition d'arrêt
-        lseek(encrypted_fd, SEEK_CUR, 1);
-        message_length = read(encrypted_fd, &message, sizeof(char)*CBC_MASK_LENGTH);
-        printf("message_length_last=%d\n", message_length);
-        return 0;
-    }
-    
-    // Stockage temporaire du vecteur pour placer l'appel récursif en fin de programme
-    char encrypted_message[CBC_MASK_LENGTH+1];
-    strcpy(encrypted_message, message);
-
-    // Décryptage
-    if(mask_xor_cbc_uncrypt(message, mask_fd)==-1) return -1;
-    xor_length(CBC_MASK_LENGTH, message, vector);
-    if(write(message_fd, message, sizeof(char)*CBC_MASK_LENGTH)==-1 ){
-        perror("write");
-        return -1;
-    }
-    
-    return cbc_uncrypt_rec(encrypted_fd, encrypted_message, message_fd, mask_fd);
-    
-}
-*/
-int cbc_uncrypt_rec(FILE* encrypted_fd, char* vector, int message_fd, int mask_fd){
-    char message[CBC_MASK_LENGTH+1];
-    message[CBC_MASK_LENGTH] = '\0';
-
-    char* mask = fetch_cbc_mask(mask_fd);
-    int c = getc(encrypted_fd);
-    int decail=0;
-    char encrypted_message[CBC_MASK_LENGTH+1];
-    strcpy(encrypted_message, vector);
-
-    while(!feof(encrypted_fd)){
-        
-        while(decail<16){
-            message[decail] = c^mask[decail]; // xor mask
-            message[decail] = message[decail]^encrypted_message[decail]; // xor vector
-
-            encrypted_message[decail] = c;
-
-            c = getc(encrypted_fd);
-            decail++;
-        }
-
-        decail=0;
-        mask = fetch_cbc_mask(mask_fd);
-        if(write(message_fd, message, sizeof(char)*CBC_MASK_LENGTH)==-1 ){
-            perror("write");
-            return -1;
-        }
-    }
-    return 0;
-    
-}
-
 #pragma endregion CBC_UTILITIES
 
 int cbc_crypt(char* message_filepath, char* init_vector, char* encrypted_filepath ){
 
+    // Réinitialisation des fichiers intermédiaires
     remove(MASK_PATH);
     fclose(fopen(MASK_PATH, "a"));
     chmod(MASK_PATH, S_IRWXU);
@@ -370,26 +230,91 @@ int cbc_crypt(char* message_filepath, char* init_vector, char* encrypted_filepat
     fclose(fopen(encrypted_filepath, "a"));
     chmod(encrypted_filepath, S_IRWXU);
     
-    int message_fd;
+    // Ouverture des fichiers
+    FILE* message_fd = fopen(message_filepath, "r");
     int encrypted_fd;
     int mask_fd;
-    if( ((message_fd=open(message_filepath, O_RDONLY))==-1)
-        | ((encrypted_fd = open(encrypted_filepath, O_WRONLY | O_APPEND | O_CREAT ))==-1) 
+    if( ((encrypted_fd = open(encrypted_filepath, O_WRONLY | O_APPEND | O_CREAT ))==-1) 
         | ((mask_fd = open(MASK_PATH, O_WRONLY | O_APPEND | O_CREAT ))==-1) ){
         perror("open");
         fprintf(stderr, "cbc_crypt : went wrong\n");
         return -1;
     }
 
+    // Initialisation
+    struct stat S;
+    stat(message_filepath, &S);
+    int message_length = S.st_size;
+    printf("message_length=%d\n", message_length);
+    int read_length = 0;
+    
+    char message[CBC_MASK_LENGTH+1];
+    char encrypted_message[CBC_MASK_LENGTH+1];
+    strcpy(message, init_vector);
     fill_str(init_vector, strlen(init_vector));
 
-    if(cbc_crypt_rec(message_fd, init_vector, encrypted_fd, mask_fd)==-1){
-        fprintf(stderr, "cbc_crypt : went wrong\n");
-        return -1;
-    }
+    int decail;
+    char* mask = malloc(sizeof(char)*(CBC_MASK_LENGTH+1));
+    mask[CBC_MASK_LENGTH] = '\n';
+    char c = getc(message_fd);
 
-    if( (close(message_fd)==-1) 
-        | (close(encrypted_fd)==-1) ){
+    // Debut traitement
+
+    // TODO : un bloc cbc est parfois traité en trop    
+    // TODO : pour la longueur des masks simples, utiliser stat à la place d'un indicateur
+    while(read_length<message_length){
+
+        decail=0;
+        // mask = gen_key(CBC_MASK_LENGTH);
+        
+
+        // remplie chaque case mémoire de key d'un élément aléatoire de ALPHA_NUM
+        printf("mask = ");
+        
+        for(int i=0; i<CBC_MASK_LENGTH; i++){
+            mask[i] = ALPHA_NUM[abs((int)(rand() % ALPHA_NUM_LENGTH))];
+            printf("%3d ", mask[i]);
+        }
+        printf("\n");
+        if(write(mask_fd, mask, sizeof(char)*CBC_MASK_LENGTH) ==-1){
+            perror("write");
+            return -1;
+        }
+
+        while( (decail<CBC_MASK_LENGTH) & (read_length<message_length) ){
+            encrypted_message[decail] = message[decail]^c; // xor vector
+            encrypted_message[decail] = encrypted_message[decail]^mask[decail]; // xor mask
+            
+            message[decail] = encrypted_message[decail];
+
+            c = getc(message_fd);
+            decail++;
+            read_length++;
+        }
+
+        // Cas du dernier bloc cbc
+        if(decail<CBC_MASK_LENGTH){
+            while(decail<CBC_MASK_LENGTH){
+                encrypted_message[decail] = message[decail]^' ';
+                encrypted_message[decail] = encrypted_message[decail]^mask[decail];
+                
+                decail++;
+            }
+        }
+        
+        if(write(encrypted_fd, encrypted_message, sizeof(char)*CBC_MASK_LENGTH)==-1){
+            perror("write");
+            return -1;
+        }
+        // free(mask);
+    }
+    // Fin traitement
+
+    // Libération des ressources
+    free(mask);
+    if( (fclose(message_fd)==-1) 
+        | (close(encrypted_fd)==-1)
+        | (close(mask_fd)==-1) ){
         perror("close");
         fprintf(stderr, "cbc_crypt : went wrong\n");
         return -1;
@@ -400,32 +325,71 @@ int cbc_crypt(char* message_filepath, char* init_vector, char* encrypted_filepat
 
 int cbc_uncrypt(char* encrypted_filepath, char* init_vector, char* uncrypted_filepath ){
     
+    // Réinitialisation des fichiers intermédiaires
     remove(uncrypted_filepath);
     fclose(fopen(uncrypted_filepath, "a"));
     chmod(uncrypted_filepath, S_IRWXU);
 
-    //int encrypted_fd;
-    FILE* encrypted_fd;
+    // Ouverture des fichiers
+    FILE* encrypted_fd = fopen(encrypted_filepath, "r");
     int message_fd;
     int mask_fd;
-    /*((*/encrypted_fd=/*open*/fopen(encrypted_filepath, "r"/*O_RDONLY*/);/*)==-1)*/
-    if(
-        /*| */((message_fd=open(uncrypted_filepath, O_WRONLY | O_APPEND | O_CREAT ))==-1) 
-        | ((mask_fd = open(MASK_PATH, O_RDONLY))==-1) ){
+    if( ((mask_fd=open(MASK_PATH, O_RDONLY))==-1)
+      | ((message_fd=open(uncrypted_filepath, O_WRONLY))==-1)){
         perror("open");
         fprintf(stderr, "cbc_uncrypt : went wrong\n");
         return -1;
     }
 
-    fill_str(init_vector, strlen(init_vector));
+    // Initialisation
+    struct stat S;
+    stat(encrypted_filepath, &S);
+    int message_length = S.st_size;
+    printf("encrypted_length=%d\n", message_length);
+    int read_length = 0;
 
-    if(cbc_uncrypt_rec(encrypted_fd, init_vector, message_fd, mask_fd)==-1){
-        fprintf(stderr, "cbc_uncrypt : went wrong\n");
-        return -1;
+    char* mask;
+    int c = getc(encrypted_fd);
+    int decail=0;
+    char message[CBC_MASK_LENGTH+1];
+    char encrypted_message[CBC_MASK_LENGTH+1];
+    strcpy(encrypted_message, init_vector);
+    fill_str(encrypted_message, strlen(encrypted_message));
+
+    // Debut traitement
+    while(read_length<message_length){
+        
+        mask = fetch_cbc_mask(mask_fd);
+        
+        printf("mask = ");
+        for(int i=0; i<CBC_MASK_LENGTH; i++){
+            printf("%3d ", mask[i]);
+        }
+        printf("\n");
+        while(decail<CBC_MASK_LENGTH){
+            message[decail] = c^mask[decail]; // xor mask
+            message[decail] = message[decail]^encrypted_message[decail]; // xor vector
+
+            encrypted_message[decail] = c;
+
+            c = getc(encrypted_fd);
+            decail++;
+            read_length++;
+        }
+        free(mask);
+
+        decail=0;
+        if(write(message_fd, message, sizeof(char)*CBC_MASK_LENGTH)==-1 ){
+            perror("write");
+            return -1;
+        }
     }
+    // Fin traitement
 
-    if( (/*close*/fclose(encrypted_fd)==-1) 
-        | (close(message_fd)==-1) ){
+    // Libération des ressources
+    if( (fclose(encrypted_fd)==-1) 
+        | (close(message_fd)==-1) 
+        | (close(mask_fd)==-1)){
         perror("close\n");
         fprintf(stderr, "cbc_uncrypt : went wrong\n");
         return -1;
