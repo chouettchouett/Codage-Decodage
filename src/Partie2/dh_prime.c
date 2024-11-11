@@ -122,11 +122,10 @@ long seek_generator(long start,long p){
   return start;
 }
 
-void generate_shared_key(long min,long max){
+void generate_shared_key(long min,long max,FILE *outfp){
   /// \brief calcule un nombre premier p de Sophie Germain et un générateur du groupe p/Zp.
   /// appelle le simulateur d'échange de clef partagée.
   /// \returns la clef partagée
-  FILE *outfp = fopen("temp.txt", "rw"); // TEMPORAIRE
 
   int cpt;
   long premier = genPrimeSophieGermain(min,max,&cpt);
@@ -135,8 +134,6 @@ void generate_shared_key(long min,long max){
   long ordre = puissance_mod_n (generateur, premier-1, premier); // generateur^{premier -1} (mod premier)
   fprintf(outfp,"generateur = %ld # ordre = %ld\n",generateur,ordre);
   assert (generateur != -1);
-
-  fclose(outfp);
 }
 
 long int_pow(long a, long e) {

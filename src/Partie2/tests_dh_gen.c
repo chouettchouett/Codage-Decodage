@@ -24,7 +24,7 @@ void test_option_o() {
     int result = system("./dh_gen_group -o param.txt");
     assert_message(result == 0, "L'option -o avec nom de fichier valide a échoué");
     
-    FILE *file = fopen("param.txt", "r");
+    FILE *file = fopen("tmp/param.txt", "r");
     assert_message(file != NULL, "Fichier param.txt non créé avec l'option -o");
     fclose(file);
     printf("Test de l'option -o avec nom de fichier valide réussi.\n");
@@ -53,7 +53,7 @@ int is_sophie_germain_prime(int p) {
 }
 
 void test_prime_sophie_germain() {
-    FILE *file = fopen("param.txt", "r");
+    FILE *file = fopen("tmp/param.txt", "r");
     assert_message(file != NULL, "Fichier param.txt introuvable pour lire p");
     
     int p;
@@ -85,7 +85,7 @@ int is_generator(int g, int p) {
 }
 
 void test_generator() {
-    FILE *file = fopen("param.txt", "r");
+    FILE *file = fopen("tmp/param.txt", "r");
     assert_message(file != NULL, "Fichier param.txt introuvable pour lire g");
 
     int p, g;

@@ -8,7 +8,7 @@ void xor(char *msg, char* key,int msg_length,char *crypted);
 long generePremierRabin(long min,long max,int *cpt);
 long seek_generator(long start,long p);
 int nb_digit_base10(long n);
-void generate_shared_key(long min,long max);
+void generate_shared_key(long min,long max,FILE *outfp);
 long genPrimeSophieGermain(long min,long max,int *cpt);
 //long xchange_shared_key(long generateur, long premier);
 long int_pow(long a, long e);
