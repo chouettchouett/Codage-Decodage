@@ -1,5 +1,9 @@
+projet_avance_automne_2024
 crypto_sym
-crypto_sym_part1
-crypto_sym_part2
-crypto_sym_part3
+dh_gen_group
+break_code
+uncrypted_message.txt
+encrypted_message.txt
+mask.txt
 /obj/
+/tmp/

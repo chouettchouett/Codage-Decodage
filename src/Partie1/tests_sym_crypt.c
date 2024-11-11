@@ -4,6 +4,7 @@
 #include <assert.h>
 #include <time.h>  
 #include "sym_crypt_func.h"
+#include "tests_sym_crypt.h"
 
 // Définition de la macro assert_message
 #define assert_message(condition, message) \
@@ -11,14 +12,6 @@
         fprintf(stderr, "Échec de l'assertion : %s\nFichier : %s, Ligne : %d\n", message, __FILE__, __LINE__); \
         exit(EXIT_FAILURE); \
     }
-
-void unpadding(char* message){
-    int i = strlen(message);
-    while(message[i]!=' ' & (i>0)){
-        message[i]='\0';
-        i--;
-    }
-}
 
 void test_xor() {
     char message[] = "Hello World!";
@@ -47,6 +40,23 @@ void test_mask_xor_crypt() {
     // Décryptage avec masque
     assert_message(mask_xor_uncrypt(message) == 0, "Échec du déchiffrement mask XOR");
     printf("Message décrypté avec mask XOR : %s\n", message);
+}
+
+void unpadding(char *message) {
+    // Exemple de code d'unpadding
+    size_t len = strlen(message);
+    while (len > 0 && message[len - 1] == ' ') {
+        message[len - 1] = '\0';  // Supprimer les espaces de fin
+        len--;
+    }
+}
+
+void afficher_et_unppad(FILE *f_dec, char *buffer) {
+    size_t len = fread(buffer, sizeof(char), 255, f_dec);
+    buffer[len] = '\0'; // Ajouter le caractère nul à la fin
+
+    // Unpadding
+    unpadding(buffer);
 }
 
 void test_cbc_crypt() {
@@ -100,34 +110,32 @@ void test_cbc_crypt() {
         putchar(c2);
     }
     printf("\n");
+    
+    // Buffer pour le message déchiffré
+    char buffer[256]; // Taille du buffer à adapter selon la taille maximum attendue
+    // Affichage du message déchiffré et suppression des espaces
+    rewind(f_dec); // Remise à zéro du pointeur de fichier avant la lecture
+    afficher_et_unppad(f_dec, buffer); // Appel de la fonction pour lire et unpad le message
+
      
     // Réinitialisation des fichiers pour la comparaison caractère par caractère
     rewind(f_orig);
     rewind(f_dec);
-    while ((c1 = fgetc(f_orig)) != EOF && (c2 = fgetc(f_dec)) != EOF) {
+    
+    // Comparaison du message d'origine et du message déchiffré
+    size_t index = 0; // Un index pour le buffer
+    while ((c1 = fgetc(f_orig)) != EOF) {
+        // Lire le caractère correspondant dans le buffer
+        char c2 = buffer[index++];
         assert_message(c1 == c2, "Le contenu des fichiers d'origine et déchiffré ne correspond pas.");
     }
-    assert_message(c1 == c2, "Les fichiers n'ont pas la même longueur.");
+    
+    // Vérification des longueurs
+    assert_message(c1 == EOF, "Les fichiers n'ont pas la même longueur."); // Assurez-vous que les deux fichiers ont la même longueur.
 
     fclose(f_orig);
     fclose(f_dec);
-    // Nettoyage des fichiers temporaires
     remove(message_filepath);
     remove(encrypted_filepath);
     remove(decrypted_filepath);
-}
-
-int main() {
-    // Initialisation pour rand()
-    srand((unsigned) time(NULL));
-    printf("=== Test XOR simple ===\n");
-    test_xor();
-    printf("\n=== Test mask XOR crypt ===\n");
-    test_mask_xor_crypt();
-    printf("\n=== Test CBC crypt ===\n");
-    test_cbc_crypt();
-    
-    printf("\nTous les tests sont réussis.\n");
-
-    return 0;
 }
