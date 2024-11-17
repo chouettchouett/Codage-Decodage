@@ -100,12 +100,12 @@ long genPrimeSophieGermain(long min,long max,int *cpt){
   do{
     num = random_long(min,max);
   } while (num%2!=1);
-
+  
   while ((!rabin(a,num) || !rabin(a,2*num+1)) && num<max){
     (*cpt)++;
     num=num+2;
   }
-  return 2*num+1;
+  return num;
 }
 
 long seek_generator(long start,long p){
