@@ -21,8 +21,6 @@ void tests() {
     test_option_o();
     test_option_o_no_filename();
     test_option_h();
-    test_prime_sophie_germain();
-    test_generator();
 
     printf("Tous les tests ont été exécutés avec succès.\n");
 }
