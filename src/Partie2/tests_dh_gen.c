@@ -14,7 +14,7 @@
 
 // Fonction de test pour l'option -o sans nom de fichier
 void test_option_o_no_filename() {
-    int result = system("./dh_gen_group -o");
+    int result = system("./dh_gen_group -o > /dev/null"); // "> /dev/null" pour ne pas afficher la sortie de dh_gen_group durant le test
     assert_message(result != 0, "L'option -o sans nom de fichier aurait dû échouer");
     printf("Test de l'option -o sans nom de fichier réussi.\n");
 }
@@ -32,7 +32,7 @@ void test_option_o() {
 
 // Fonction de test pour l'option -h
 void test_option_h() {
-    int result = system("./dh_gen_group -h");
+    int result = system("./dh_gen_group -h > /dev/null"); // "> /dev/null" pour ne pas afficher la sortie de dh_gen_group durant le test
     assert_message(result == 0, "L'option -h aurait dû afficher l'aide sans erreur");
     printf("Test de l'option -h réussi.\n");
 }

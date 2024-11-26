@@ -1,6 +1,8 @@
 projet_avance_automne_2024
 crypto_sym
 dh_gen_group
+dh_genkey.py
+test_dh_simulation.py
 break_code
 uncrypted_message.txt
 encrypted_message.txt
