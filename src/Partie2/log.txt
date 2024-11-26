@@ -1,0 +1,24 @@
+Alice et Bob ont choisi p = 1211207 et g = 5.
+
+Ici Eve, je connais p = 1211207 et g = 5.
+
+Ici Alice, j'ai choisi le nombre secret a = 402854.
+J'ai calcule A = 626963, je l'envoie à Bob.
+
+Ici Eve, j'ai intercepte A = 626963.
+
+Ici Bob, j'ai choisi le nombre secret b = 743196.
+J'ai calcule B = 655645, je l'envois à Alice.
+
+Ici Eve, j'ai intercepte B = 655645
+
+Ici Alice, j'ai reçu de Bob B = 655645.
+J'ai calculé la cle = 573913.
+
+Ici Bob, j'ai reçu d'Alice A = 626963.
+J'ai calcule la cle = 573913.
+
+Au final :
+ - Bob connait : p = 1211207, g = 5, b = 743196, B = 655645, A = 626963 et la cle = 573913.
+ - Eve connait : p = 1211207, g = 5, A = 626963 et B = 655645.
+ - Alice connait : p = 1211207, g = 5, a = 402854, A = 626963, B = 655645 et la cle = 573913.
