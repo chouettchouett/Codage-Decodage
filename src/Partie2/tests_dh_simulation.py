@@ -8,43 +8,48 @@ class TestDiffieHellmanSimulation(unittest.TestCase):
 
     def setUp(self):
         # Créer un fichier d'entrée temporaire pour les paramètres Diffie-Hellman
-        self.temp_dir = tempfile.TemporaryDirectory()
-        self.input_file = os.path.join(self.temp_dir.name, "input.txt")
-        self.output_file = os.path.join(self.temp_dir.name, "output.txt")
-        self.log_file = "/home/chouett/Documents/Projet_avance/Codage-Decodage-main/src/Partie2/log.txt"
-        self.outputmoi = "/home/chouett/Documents/Projet_avance/Codage-Decodage-main/src/Partie2/output.txt"
+        self.tmp_path = "tmp/"
+        self.input_file = "input.txt"
+        self.input_file_path = "tmp/" + self.input_file
+        self.output_file = "output.txt"
+        self.output_file_path = "tmp/" + self.output_file
+        self.log_file = "log_part2"
+        self.log_file_path = "tmp/" + self.log_file
+
+        # Crée le dossier tmp s'il n'existe pas
+        if not os.path.exists(self.tmp_path):
+            os.makedirs(self.tmp_path)
 
         # Écriture des paramètres Diffie-Hellman dans le fichier d'entrée
-        with open(self.input_file, "w") as f:
-            f.write("23\n5\n")
+        with open(self.input_file_path, "w") as f:
+            f.write("23\n5 1\n")
 
     def tearDown(self):
-        # Nettoyer les fichiers temporaires
-        self.temp_dir.cleanup()
-
+        return
+    
     def read_log(self):
         """Lit et retourne le contenue du fichier log"""
-        with open(self.log_file,"r") as f:
+        with open(self.log_file_path,"r") as f:
             return f.read()
 
     def test_simulation_output(self):
         """Vérifie que la simulation génère une clé et l'écrit dans le fichier de sortie."""
         result = run(
-            ["python3", "/home/chouett/Documents/Projet_avance/Codage-Decodage-main/src/Partie2/dh_genkey.py", "-i", self.input_file, "-o", self.output_file],
+            ["python3", "dh_genkey.py", "-i", self.input_file, "-o", self.output_file],
             stdout=PIPE,
             stderr=PIPE
         )
         log_content = self.read_log()
 
-        self.assertTrue(os.path.exists(self.outputmoi), "Le fichier de sortie n'a pas été créé.")
-        with open(self.outputmoi, "r") as f:
+        self.assertTrue(os.path.exists(self.output_file_path), "Le fichier de sortie n'a pas été créé.")
+        with open(self.output_file_path, "r") as f:
             key = f.read().strip()
         self.assertTrue(key.isdigit(), "Le fichier de sortie ne contient pas une clé valide sous forme d'entier.")
         
     def test_shared_key_calculation(self):
         """Tester que les calculs de clés partagées d'Alice et Bob aboutissent à la même valeur."""
         result = run(
-            ["python3", "/home/chouett/Documents/Projet_avance/Codage-Decodage-main/src/Partie2/dh_genkey.py", "-i", self.input_file, "-o", self.output_file],
+            ["python3", "dh_genkey.py", "-i", self.input_file, "-o", self.output_file],
             stdout=PIPE,
             stderr=PIPE
         )
@@ -65,7 +70,7 @@ class TestDiffieHellmanSimulation(unittest.TestCase):
     def test_thread_synchronization(self): 
         """Vérifie que les threads respectent l'ordre logique."""
         result = run(
-            ["python3", "/home/chouett/Documents/Projet_avance/Codage-Decodage-main/src/Partie2/dh_genkey.py", "-i", self.input_file, "-o", self.output_file],
+            ["python3", "dh_genkey.py", "-i", self.input_file, "-o", self.output_file],
             stdout=PIPE,
             stderr=PIPE
         )
@@ -83,11 +88,11 @@ class TestDiffieHellmanSimulation(unittest.TestCase):
     
     def test_invalid_input_file(self):
         """Tester que le script gère correctement un fichier d'entrée invalide."""
-        invalid_input_file = os.path.join(self.temp_dir.name, "invalid_input.txt")
+        invalid_input_file = "tmp/invalid_input.txt"
 
         # Exécuter le script avec un fichier d'entrée inexistant
         result = run(
-            ["python3", "/home/chouett/Documents/Projet_avance/Codage-Decodage-main/src/Partie2/dh_genkey.py", "-i", invalid_input_file, "-o", self.output_file],
+            ["python3", "dh_genkey.py", "-i", invalid_input_file, "-o", self.output_file],
             stdout=PIPE,
             stderr=PIPE
         )
@@ -100,12 +105,12 @@ class TestDiffieHellmanSimulation(unittest.TestCase):
     def test_invalid_input_content(self):      # clear
         """Tester que le script gère correctement un contenu de fichier d'entrée invalide."""
         # Remplir le fichier d'entrée avec un contenu invalide
-        with open(self.input_file, "w") as f:
+        with open(self.input_file_path, "w") as f:
             f.write("Contenu invalide")
 
         # Exécuter le script avec un contenu de fichier d'entrée invalide
         result = run(
-            ["python3", "/home/chouett/Documents/Projet_avance/Codage-Decodage-main/src/Partie2/dh_genkey.py", "-i", self.input_file, "-o", self.output_file],
+            ["python3", "dh_genkey.py", "-i", self.input_file, "-o", self.output_file],
             stdout=PIPE,
             stderr=PIPE
         )
@@ -113,7 +118,7 @@ class TestDiffieHellmanSimulation(unittest.TestCase):
 
         # Vérifier que le script échoue avec un code d'erreur approprié
         self.assertNotEqual(result.returncode, 0, "Le script aurait dû échouer avec un contenu d'entrée invalide.")
-        self.assertIn("Erreur : le fichier d'entrée n'existe pas.", result.stderr.decode() or result.stdout.decode())
+        self.assertIn("Erreur : le fichier d'entrée est incorrect.", result.stderr.decode() or result.stdout.decode())
         
 if __name__ == "__main__":
     unittest.main()

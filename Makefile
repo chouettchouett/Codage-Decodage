@@ -50,7 +50,7 @@ $(EXEC_PART1): $(OBJ_PART1)
 $(EXEC_PART2): $(OBJ_PART2)
 	@$(CC) -o $@ $^ $(LDFLAGS)
 	@cp src/Partie2/dh_genkey.py ./
-	@cp src/Partie2/test_dh_simulation.py ./
+	@cp src/Partie2/tests_dh_simulation.py ./
 
 $(EXEC_PART3): $(OBJ_PART3)
 	@$(CC) -o $@ $^ $(LDFLAGS)
@@ -62,4 +62,4 @@ clean_tmp:
 	@rm -rf obj/ tmp/ encrypted_message.txt mask.txt uncrypted_message.txt
 
 clean:
-	@rm -rf obj/ tmp/ $(EXEC) $(EXEC_PART1) $(EXEC_PART2) $(EXEC_PART3) encrypted_message.txt mask.txt uncrypted_message.txt dh_genkey.py test_dh_simulation.py
+	@rm -rf obj/ tmp/ $(EXEC) $(EXEC_PART1) $(EXEC_PART2) $(EXEC_PART3) encrypted_message.txt mask.txt uncrypted_message.txt dh_genkey.py tests_dh_simulation.py
