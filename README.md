@@ -22,15 +22,15 @@ Commandes :
 
 ### Partie1
 [Partie1 information de compilation](src/Partie1)
--`make part`
+- `make part`
 
 ### Partie2
 [Partie2 information de compilation](src/Partie2)
--`make part2`
+- `make part2`
 
 (je te laisse complété kylian ^^)
 
--`python3 dh_genkey.py`
--`python3 tests_dh_simulation.py`
+- `python3 dh_genkey.py`
+- `python3 tests_dh_simulation.py`
 
 
