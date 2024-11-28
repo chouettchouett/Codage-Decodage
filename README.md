@@ -20,10 +20,11 @@ Commandes :
 - `make clean` - Pour supprimer les fichiers objets, les fichiers temporaires et les exécutables
 - `make clean_tmp` - Pour supprimer seulement les fichiers objets et les fichiers temporaires.
 
-
+### Partie1
 [Partie1 information de compilation](src/Partie1)
 -`make part`
 
+### Partie2
 [Partie2 information de compilation](src/Partie2)
 -`make part2`
 
