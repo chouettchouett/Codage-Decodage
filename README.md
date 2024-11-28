@@ -31,7 +31,7 @@ C :
 Python :
 - `python3 dh_genkey.py -i [input] -o [output]`
 - `python3 dh_genkey.py -h` - Pour afficher l'aide du programme python.
-- `python3 tests_dh_simulation.p` - Pour lancer les tests du programme python.
+- `python3 tests_dh_simulation.py` - Pour lancer les tests du programme python.
 
 ### [Partie 3](src/Partie3)
 TODO
