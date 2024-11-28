@@ -33,5 +33,5 @@ Python :
 - `python3 dh_genkey.py -h` - Pour afficher l'aide du programme python.
 - `python3 tests_dh_simulation.p` - Pour lancer les tests du programme python.
 
-### [Partie 2](src/Partie3)
+### [Partie 3](src/Partie3)
 TODO
