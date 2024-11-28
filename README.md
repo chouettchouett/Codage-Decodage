@@ -20,4 +20,4 @@ Commandes :
 - `make clean` - Pour supprimer les fichiers objets, les fichiers temporaires et les exécutables
 - `make clean_tmp` - Pour supprimer seulement les fichiers objets et les fichiers temporaires.
 
-[Contribution guidelines for this project](docs/CONTRIBUTING.md)
+[Partie2 information de compilation](src/Partie2)
