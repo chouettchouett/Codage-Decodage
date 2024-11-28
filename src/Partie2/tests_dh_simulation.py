@@ -24,9 +24,6 @@ class TestDiffieHellmanSimulation(unittest.TestCase):
         with open(self.input_file_path, "w") as f:
             f.write("23\n5 1\n")
 
-    def tearDown(self):
-        return
-    
     def read_log(self):
         """Lit et retourne le contenue du fichier log"""
         with open(self.log_file_path,"r") as f:
