@@ -20,4 +20,16 @@ Commandes :
 - `make clean` - Pour supprimer les fichiers objets, les fichiers temporaires et les exécutables
 - `make clean_tmp` - Pour supprimer seulement les fichiers objets et les fichiers temporaires.
 
+
+[Partie1 information de compilation](src/Partie1)
+make part1
+
 [Partie2 information de compilation](src/Partie2)
+make part2
+
+(je te laisse complété kylian ^^)
+
+python3 dh_genkey.py
+python3 tests_dh_simulation.py
+
+
