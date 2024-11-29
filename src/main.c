@@ -1,24 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <string.h>
-#include <time.h>
 
+#include "utils.h"
 #include "Partie1/sym_crypt_func.h"
 #include "Partie2/dh_gen_group.h"
 //#include "Partie3/?.h"
 
 
-void log_message(char *msg, FILE *log_file) {
-    // TODO
-}
-
-void print_and_log_message(char *msg, FILE *log_file) {
-    printf("%s", msg);
-    log_message(msg, log_file);
-}
-
-int command_prompt(/* Ajouter pointeur d'arguments */) {
+int command_prompt(/* Ajouter pointeur d'arguments, */ FILE *log_file) {
     int choice = -1;
 
     printf("> ");
@@ -33,13 +23,13 @@ int command_prompt(/* Ajouter pointeur d'arguments */) {
     return choice;
 }
 
-int menu() {
+int menu(FILE *log_file) {
     bool quit = false;
 
     printf("Projet avancé Automne 2024 - Equipe 13\n");
 
     while(!quit) {
-        switch (command_prompt(/* char **args ?*/)) {
+        switch (command_prompt(/* char **args ?,*/ log_file)) {
             case 0: //quit
                 quit = true;
                 break;
@@ -65,7 +55,7 @@ int menu() {
 
                 break;
             default:
-                fprintf(stderr, "Erreur : Mauvaise entrée. Entrer \"help\" pour plus d'information.");
+                print_and_log("Erreur : Mauvaise entrée. Entrer \"help\" pour plus d'information.\n", true, log_file);
                 exit(0); // Temporaire, pour éviter la boucle infinie :)
         }
     }
@@ -74,5 +64,14 @@ int menu() {
 }
 
 int main () {
-    menu();
+    FILE *log_file = create_file("log", false, LOG);
+    
+    menu(log_file);
+
+    if (fclose(log_file) != 0) {
+            fprintf(stderr, "Erreur : fclose(log_file)\n");
+            exit(1);
+    }
+
+    return 0;
 }

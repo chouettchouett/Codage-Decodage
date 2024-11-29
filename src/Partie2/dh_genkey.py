@@ -9,7 +9,8 @@ import os
 
 
 TMP_PATH = "tmp/"
-LOG_PATH = TMP_PATH + "log_part2"
+LOG_PATH = "logs/"
+LOG_FILE = LOG_PATH + "log_part2"
 
 # Couleurs pour l'affichage
 RED = "\033[31m"
@@ -30,7 +31,7 @@ event_fin = threading.Event()
 # Fonction utilitaire pour écrire dans le log
 def log_message(message):
     """Écrit un message dans un fichier log et l'affiche."""
-    with open(LOG_PATH, "a") as f:
+    with open(LOG_FILE, "a") as f:
         f.write(message + "\n")
     print(message)
 
@@ -182,7 +183,7 @@ def main():
         os.makedirs("tmp/")
     
     # Vide le fichier log au début de l'exécution
-    with open(LOG_PATH, "w") as log_file:
+    with open(LOG_FILE, "w") as log_file:
         log_file.write("")
 
     # Gestion des arguments

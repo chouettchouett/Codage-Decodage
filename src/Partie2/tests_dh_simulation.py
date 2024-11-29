@@ -14,7 +14,7 @@ class TestDiffieHellmanSimulation(unittest.TestCase):
         self.output_file = "output.txt"
         self.output_file_path = "tmp/" + self.output_file
         self.log_file = "log_part2"
-        self.log_file_path = "tmp/" + self.log_file
+        self.log_file_path = "logs/" + self.log_file
 
         # Crée le dossier tmp s'il n'existe pas
         if not os.path.exists(self.tmp_path):
