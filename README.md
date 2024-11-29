@@ -19,19 +19,22 @@ Le projet importeras des fonctionnalités de codages-décodage, Cryptographie sy
 - `make clean` - Pour supprimer les fichiers objets, les fichiers temporaires et les exécutables
 - `make clean_tmp` - Pour supprimer seulement les fichiers objets et les fichiers temporaires.
 
+### [Programme principal](src/main.c)
+TODO
+
 ### [Partie 1](src/Partie1)
 TODO
 
 ### [Partie 2](src/Partie2)
-C :
-- `./dh_gen_group -o [output]`
-- `./dh_gen_group -h` - Pour afficher l'aide du programme C.
-- `./dh_gen_group -t` - Pour lancer les tests du programme C.
+#### C :
+- `./dh_gen_group -o <output>`
+- `./dh_gen_group -h` - Pour afficher l'aide.
+- `./dh_gen_group -t` - Pour lancer les tests.
 
-Python :
-- `python3 dh_genkey.py -i [input] -o [output]`
-- `python3 dh_genkey.py -h` - Pour afficher l'aide du programme python.
-- `python3 tests_dh_simulation.py` - Pour lancer les tests du programme python.
+#### Python :
+- `python3 dh_genkey.py -i <input> -o <output>`
+- `python3 dh_genkey.py -h` - Pour afficher l'aide.
+- `python3 tests_dh_simulation.py` - Pour lancer les tests.
 
 ### [Partie 3](src/Partie3)
 TODO
