@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 #include "break_code.h"
+#include "tests_break_code.h"
 
 // Macro pour assertions avec messages
 #define assert_message(condition, message) \
