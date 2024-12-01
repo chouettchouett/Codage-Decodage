@@ -4,31 +4,7 @@
 #include <assert.h>
 #include "break_code.h"
 #include "tests_break_code.h"
-
-// Macro pour assertions avec messages
-#define assert_message(condition, message) \
-    if (!(condition)) { \
-        fprintf(stderr, "Échec de l'assertion : %s\nFichier : %s, Ligne : %d\n", message, __FILE__, __LINE__); \
-        exit(EXIT_FAILURE); \
-    }
-
-// Gestion des fichiers temporaires
-void cleanup_files(const char* files[], int file_count) {
-    for (int i = 0; i < file_count; i++) {
-        remove(files[i]);
-    }
-}
-
-// Fonction utilitaire pour créer un fichier temporaire
-void create_mock_file(const char* filename, const char* content) {
-    FILE* file = fopen(filename, "w");
-    if (file == NULL) {
-        fprintf(stderr, "Erreur à l'ouverture de %s\n", filename);
-        exit(EXIT_FAILURE);
-    }
-    fprintf(file, "%s", content);
-    fclose(file);
-}
+#include "test_utils.h"
 
 //-----------------------------
 //
