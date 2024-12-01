@@ -73,8 +73,7 @@ FILE *create_file(char *file_name, bool overwrite_file, enum File_Type file_type
         return file;
 }
 
-// Ecrit le message au format "[%d/%m/%Y-%H:%M:%S] - <msg>" dans le fichier log
-void log_msg(char *msg, FILE *log_file) {
+void log_msg(char *msg, bool input, FILE *log_file) {
     // Génération de l'heure
     char str_time[23];
     time_t t = time(NULL);
@@ -82,8 +81,10 @@ void log_msg(char *msg, FILE *log_file) {
     strftime(str_time, sizeof(str_time), "[%d/%m/%Y-%H:%M:%S] ", tm);
 
     // Création du message de log
-    char log_msg[strlen(str_time) + strlen(msg)];    
+    char log_msg[2 + strlen(str_time) + strlen(msg)];
     strcpy(log_msg, str_time);
+    if (input)
+        strcat(log_msg, "> ");
     strcat(log_msg, msg);
 
     fprintf(log_file, log_msg);
@@ -95,5 +96,5 @@ void print_and_log(char *msg, bool error, FILE *log_file) {
     else
         printf("%s", msg);
     
-    log_msg(msg, log_file);
+    log_msg(msg, false, log_file);
 }

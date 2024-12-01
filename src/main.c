@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdbool.h>
 
 #include "utils.h"
@@ -7,56 +8,93 @@
 #include "Partie2/dh_gen_group.h"
 //#include "Partie3/?.h"
 
+#define MAX_INPUT_LENGTH 200 // ?
+#define MAX_ARGS 5
 
-int command_prompt(/* Ajouter pointeur d'arguments, */ FILE *log_file) {
+// Toutes les commandes possibles :
+#define NB_COMMANDS 8
+
+char *commands[] = {
+    "quit",
+    "list-keys",
+    "gen-key",
+    "del-key",
+    "encrypt",
+    "decrypt",
+    "crack",
+    "help"
+};
+
+
+int command_prompt(char **args, FILE *log_file) {
+    char input[MAX_INPUT_LENGTH];
+    char *command;
+    char *arg;
     int choice = -1;
+    int i = 0;
 
+    // Lire l'entrée de l'utilisateur
     printf("> ");
-    // TODO :
-    // Lire la ligne
+    fgets(input, MAX_INPUT_LENGTH, stdin);
+    log_msg(input, true, log_file);
+
     // Récupérer la commande
-    // Vérifier si la commande est correcte
-    // Si oui, récupérer les arguments de la commande
-    // Si les arguments sont corrects, on renvoie le numéro de commande et les arguments
-    // Sinon on renvoie -1
+    input[strcspn(input, "\n")] = '\0';
+    command = strtok(input, " ");
+
+    for (int i = 0; i < NB_COMMANDS && choice == -1; i++)
+        if (strcmp(command, commands[i]) == 0)
+            choice = i;
     
+    // Récupérer les arguments
+    while (i < MAX_ARGS && (arg = strtok(NULL, " ")) != NULL) {
+        args[i] = arg;
+        i++;
+    }
+
+    // Effacer les derniers arguments
+    while (i < MAX_ARGS) {
+        args[i] = NULL;
+        i++;
+    }
+
     return choice;
 }
 
 int menu(FILE *log_file) {
     bool quit = false;
+    char *args[MAX_ARGS];
 
     printf("Projet avancé Automne 2024 - Equipe 13\n");
 
     while(!quit) {
-        switch (command_prompt(/* char **args ?,*/ log_file)) {
+        switch (command_prompt(args, log_file)) {
             case 0: //quit
                 quit = true;
                 break;
             case 1: //list-keys
-
+                printf("Choix 1\n"); // TEMPORAIRE
                 break;
             case 2: //gen-key
-
+                printf("Choix 2\n"); // TEMPORAIRE
                 break;
             case 3: //del-key
-                
+                printf("Choix 3\n"); // TEMPORAIRE
                 break;
             case 4: //encrypt
-
+                printf("Choix 4\n"); // TEMPORAIRE
                 break;
             case 5: //decrypt
-
+                printf("Choix 5\n"); // TEMPORAIRE
                 break;
             case 6: //crack
-            
+                printf("Choix 6\n"); // TEMPORAIRE          
                 break;
             case 7: //help
-
+                printf("Choix 7\n"); // TEMPORAIRE
                 break;
             default:
                 print_and_log("Erreur : Mauvaise entrée. Entrer \"help\" pour plus d'information.\n", true, log_file);
-                exit(0); // Temporaire, pour éviter la boucle infinie :)
         }
     }
 
