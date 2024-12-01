@@ -46,16 +46,18 @@ int command_prompt(char **args, FILE *log_file) {
         if (strcmp(command, commands[i]) == 0)
             choice = i;
     
-    // Récupérer les arguments
-    while (i < MAX_ARGS && (arg = strtok(NULL, " ")) != NULL) {
-        args[i] = arg;
-        i++;
-    }
-
-    // Effacer les derniers arguments
-    while (i < MAX_ARGS) {
-        args[i] = NULL;
-        i++;
+    // Récupérer les arguments si la commande est correcte
+    if (choice != -1) {
+        while (i < MAX_ARGS && (arg = strtok(NULL, " ")) != NULL) {
+            args[i] = arg;
+            i++;
+        }
+        
+        // Effacer les derniers arguments
+        while (i < MAX_ARGS) {
+            args[i] = NULL;
+            i++;
+        }
     }
 
     return choice;
