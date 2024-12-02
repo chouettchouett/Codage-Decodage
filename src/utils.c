@@ -51,23 +51,21 @@ FILE *create_file(char *file_name, bool overwrite_file, enum File_Type file_type
         FILE *file;
         char *file_dir = get_file_dir(file_type);
         char file_path[strlen(file_dir) + strlen(file_name)];
+        char *fopen_modes;
 
         strcpy(file_path, file_dir);
         strcat(file_path, file_name);
 
         create_dir(file_type);
 
-        if (overwrite_file) {
-            if ((file = fopen(file_path, "w")) == NULL) {
-                    fprintf(stderr, "Erreur : fopen\n");
-                    exit(3);
-            }
-        }
-        else {
-            if ((file = fopen(file_path, "a")) == NULL) {
-                fprintf(stderr, "Erreur : fopen\n");
-                exit(4);
-            }
+        if (overwrite_file)
+            fopen_modes = "w";
+        else
+            fopen_modes = "a";
+            
+        if ((file = fopen(file_path, fopen_modes)) == NULL) {
+            fprintf(stderr, "Erreur : fopen\n");
+            exit(3);
         }
 
         return file;
