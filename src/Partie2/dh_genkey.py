@@ -178,9 +178,11 @@ def write_key(output_file_name, key):
 
 
 def main():
-    # Crée le dossier tmp s'il n'existe pas
+    # Crée le dossier tmp et logs s'il n'existe pas
     if not os.path.exists("tmp/"):
         os.makedirs("tmp/")
+    if not os.path.exists("logs/"):
+        os.makedirs("logs/")
     
     # Vide le fichier log au début de l'exécution
     with open(LOG_FILE, "w") as log_file:
