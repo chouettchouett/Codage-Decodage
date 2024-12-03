@@ -1,0 +1,31 @@
+// Fonction qui génère les candidats possibles pour chaque position de la clé
+void find_possible_keys(const unsigned char *encrypted_msg, size_t msg_len, 
+                        size_t key_len, unsigned char candidates[key_len][ALPHABET_SIZE + 1]) {
+    const char *alphabet = ALPHABET;
+
+    // Initialiser les candidats
+    for (size_t i = 0; i < key_len; i++) {
+        size_t pos = 0;
+        for (size_t j = 0; j < ALPHABET_SIZE; j++) {
+            int is_valid = 1;  // Variable pour vérifier si un candidat est valide pour tous les indices multiples
+            char candidate = alphabet[j];
+
+            // Tester ce candidat sur tous les indices multiples de key_len
+            for (size_t k = i; k < msg_len; k += key_len) {
+                char decrypted = encrypted_msg[k] ^ candidate;  // Appliquer l'opération XOR
+
+                // Si le caractère déchiffré n'est pas valide, le candidat échoue
+                if (!is_valid_char(decrypted)) {
+                    is_valid = 0;
+                    break;  // On arrête les tests dès qu'un caractère est invalide
+                }
+            }
+
+            // Si le candidat est valide pour tous les indices multiples, on l'ajoute
+            if (is_valid) {
+                candidates[i][pos++] = candidate;
+            }
+        }
+        candidates[i][pos] = '\0';  // Terminer la liste par un caractère nul
+    }
+}
