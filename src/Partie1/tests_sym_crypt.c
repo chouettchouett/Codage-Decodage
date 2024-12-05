@@ -5,13 +5,7 @@
 #include <time.h>  
 #include "sym_crypt_func.h"
 #include "tests_sym_crypt.h"
-
-// Définition de la macro assert_message
-#define assert_message(condition, message) \
-    if (!(condition)) { \
-        fprintf(stderr, "Échec de l'assertion : %s\nFichier : %s, Ligne : %d\n", message, __FILE__, __LINE__); \
-        exit(EXIT_FAILURE); \
-    }
+#include "../test_utils.h" //assert_message
 
 void test_xor() {
     char message[] = "Hello World!";
