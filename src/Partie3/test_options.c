@@ -4,6 +4,7 @@
 #include <assert.h>
 #include "test_utils.h"
 #include "break_code.h"
+#include "../test_utils.h"
 
 void test_help_option() {
     printf("=== Test Option -h ===\n");
