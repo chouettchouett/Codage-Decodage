@@ -4,13 +4,7 @@
 #include <string.h>
 #include <assert.h>
 #include "tests_dh_gen.h"
-
-// Macro d'assertion pour afficher les erreurs spécifiques
-#define assert_message(condition, message) \
-    if (!(condition)) { \
-        fprintf(stderr, "Echec de l'assertion : %s\nFichier : %s, Ligne : %d\n", message, __FILE__, __LINE__); \
-        exit(EXIT_FAILURE); \
-    }
+#include "../test_utils.h" //assert_message
 
 // Fonction de test pour l'option -o sans nom de fichier
 void test_option_o_no_filename() {
