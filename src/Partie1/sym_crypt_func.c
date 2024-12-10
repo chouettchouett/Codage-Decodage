@@ -12,9 +12,20 @@
 #define ALPHA_NUM "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
 #define ALPHA_NUM_LENGTH strlen(ALPHA_NUM)-1
 
-const char* MASK_PATH = "./mask.txt";
+const char* MASK_PATH = "./src/Partie1/mask.txt";
 #define CBC_MASK_LENGTH 16
 
+//TODO : modifier toutes les lectures de clé, elles seront désormais effectuées dans un fichier.
+//TODO : utiliser une variable globale pour déterminer le filepath du fichier
+
+//TODO : variables globales des fichiers d' I/O
+
+// TODO : lecture de l'init-vector dans un fichier pour les fonctions cbc;
+    // Ajouter une fonction pour ce faire (pour ne pas invalider les tests)
+
+// TODO : mask-crypt & mask-uncrypt => mask (les tests seront innévitablement invalidés)
+    // Cependant on a tjrs : appliquer 2 fois mask() => retour au message de base
+// TODO : I/O : gen_key, mask
 
 //Note importante : quand mask_crypt ou cbc_crypt est appelé, les masques précédents sont détruits
     // Ainsi, utiliser un mask_xor puis un cbc_crypt effacera les données du mask_xor

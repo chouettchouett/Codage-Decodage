@@ -5,9 +5,15 @@
 #include <time.h>
 #include <assert.h>
 #include "tests_sym_crypt.h"
+#include "sym_crypt_utils.h"
 
 int argc_;
-char* argv_[];
+char** argv_;
+
+#define WRONG_ARGS "Wrong arguments : ./sym_crypt -i nom_fichier_message \
+-o nom_fichier_chiffré -[k clef,f fichier_clé] -m nom_methode -v nom_fichier_vecteur_init\n"
+
+
 
 int HasArgument(char* c){
     for(int i=1; i<argc_; i++){
@@ -16,31 +22,14 @@ int HasArgument(char* c){
     return -1;
 }
 
-#define message_max_length 100000
-int GetMessageFromFilepath(char* message, char* filepath){
-    FILE* fd = fopen(filepath, "rb");
-
-    if(fd==-1){
-        fprintf("message_filepath open");
-        return -1;
-    }
-    malloc(sizeof(char)*message_max_length);
-    while(fread(&message[i], sizeof(char), 2048, fd)>0)
-        i+=2048*sizeof(char);
-
-    fclose(fd);
-}
-
-#define WrongArgsString "Wrong arguments : ./sym_crypt -i nom_fichier_message\
-             -o nom_fichier_chiffré -[k clef,f fichier_clé] -m nom_methode -v nom_fichier_vecteur_init"
-
-
-int xor_func(char* input_path, char* key, char* output_path){
+// Generalized xor function using the config.txt file
+int xor_func(char* key, char* input_path, char* output_path){
+    
     FILE* fd_input = fopen(input_path, "rb");
     FILE* fd_output = fopen(output_path, "wb");
     if((fd_input==NULL)
      || fd_output==NULL){
-        fprintf(stderr, "Unable to open file"); perror("");
+        fprintf(stderr, "Unable to open file\n");
         return -1;
     }
     int key_length = strlen(key);
@@ -53,7 +42,12 @@ int xor_func(char* input_path, char* key, char* output_path){
 
     fclose(fd_input);
     fclose(fd_output);
+    return 0;
 }
+
+
+#define KEY_PATH "./src/Partie1/key.txt"
+#define INIT_VECTOR_PATH "./src/Partie1/init_vector.txt"
 
 int main(int argc, char* argv[]) {
     argc_ = argc;
@@ -70,43 +64,54 @@ int main(int argc, char* argv[]) {
         int m = HasArgument("-m");// -m nom_methode (parmis xor, cbc-crypt, cbc-uncrypt, mask-crypt, mask-uncrypt)
         int v = HasArgument("-v");// -v nom_fichier_vecteur_init
         
+        // Vérifications d'erreurs simples
         if((i==-1)
         || (o==-1)
         || ((k==-1) && (f==-1))
         || (m==-1) ){
-            fprintf(stderr, WrongArgsString);
+            fprintf(stderr, WRONG_ARGS);
+            return 1;
+        }
+        char* method = argv[m];
+        if( (strcmp(method,"cbc-crypt")==0 || strcmp(method,"cbc-uncrypt")==0)
+           && (v==-1) ){
+            fprintf(stderr, WRONG_ARGS);
             return 1;
         }
 
-        char* method = argv[m];
-        if(argv[m]!="cbc-crypt" && argv[m]!="cbc-uncrypt"){
-            if(argv[m]=="mask-crypt" || argv[m]=="mask-uncrypt") GetMessageFromFilepath(message, argv[i]);
-        }else{
-            if (v==-1){
-                fprintf(stderr, WrongArgsString);
-                return 1;
-            }
-        }
+        // Initialisation de la config
+        char* key_path = (k==-1)? argv[f] : KEY_PATH;
+        char* input_path = argv[i];
+        char* output_path = argv[o];
+        char* init_vector = (v==-1)? INIT_VECTOR_PATH : argv[v];
+        set_config(key_path, input_path, output_path, init_vector);
 
-        switch(method){
-            case "xor":
-                if(f==-1) xor_func_withkey(argv[i], argv[k], argv[o]);
-                // TODO : else xor_func_withpath ?
-            case "cbc-crypt":
-                // TODO : key filepath ?
-                cbc_crypt(argv[i], init_vector, argv[o]);
-            case "cbc-uncrypt":
-                // TODO : key filepath ?
-                cbc_uncrypt(argv[i], init_vector, argv[o] );
-            case "mask-crypt":
-                // TODO : key filepath ? I/O
-                mask_xor_crypt(message);
-            case "mask-uncrypt":
-                // TODO : key filepath ? I/O
-                mask_xor_uncrypt(message);
+        // Appel de la fonction correspondant à la méthode demandée
+        if(strcmp(method, "xor")==0){
+            if(k!=-1){
+                FILE* fd = fopen(key_path, "wb");
+                fwrite(argv[k], sizeof(char), strlen(argv[k]), fd);
+                fclose(fd);
+            }
+            xor_func(argv[i], argv[k], argv[o]);
+        }if(strcmp(method, "cbc-crypt")==0){
+            // TODO : key filepath ?
+            cbc_crypt(argv[i], init_vector, argv[o]);
+        }if(strcmp(method, "cbc-uncrypt")==0){
+            // TODO : key filepath ?
+            cbc_uncrypt(argv[i], init_vector, argv[o] );
+        }if(strcmp(method, "mask-crypt")==0){
+            // TODO : enlever les indicateurs de tailles de mask, pour permettre de lire les key dans un fichier
+                // et aussi joindre mask-crypt et mask-uncrypt
+            // TODO : key filepath ? I/O
+            //mask_xor_crypt(message);
+        }if(strcmp(method, "mask-uncrypt")==0){
+            // TODO : key filepath ? I/O
+            //mask_xor_uncrypt(message);
         }
-    }else if( argc==2){
-        if(HasArgument("-t")){
+    }
+    else if( argc==2){
+        if(strcmp("-t", argv[1])==0){
             printf("=== Test XOR simple ===\n");
             test_xor();
             printf("\n=== Test mask XOR crypt ===\n");
@@ -116,8 +121,12 @@ int main(int argc, char* argv[]) {
             
             printf("\nTous les tests sont réussis.\n");
         }else{
-            fprintf(stderr, WrongArgsString);
+            fprintf(stderr, WRONG_ARGS);
+            return 1;
         }
+    }else{
+        fprintf(stderr, WRONG_ARGS);
+        return 1;
     }
 
     return 0;

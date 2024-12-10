@@ -1,0 +1,4 @@
+KEY_PATH ./key.txt
+INPUT_PATH ./input.txt
+OUTPUT_PATH ./output.txt
+INIT_VECTOR ./init_vector.txt
