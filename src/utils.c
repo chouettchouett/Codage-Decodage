@@ -71,16 +71,19 @@ FILE *create_file(char *file_name, bool overwrite_file, enum File_Type file_type
         return file;
 }
 
-void log_msg(char *msg, bool input, FILE *log_file) {
-    // Génération de l'heure
+void log_msg(char *msg, bool input, bool log_time, FILE *log_file) {
     char str_time[23];
-    time_t t = time(NULL);
-    struct tm *tm = localtime(&t);
-    strftime(str_time, sizeof(str_time), "[%d/%m/%Y-%H:%M:%S] ", tm);
+    char log_msg[3 + sizeof(str_time) + strlen(msg)];
 
-    // Création du message de log
-    char log_msg[2 + strlen(str_time) + strlen(msg)];
-    strcpy(log_msg, str_time);
+    // Ajout de l'heure si nécessaire
+    if (log_time) {
+        time_t t = time(NULL);
+        struct tm *tm = localtime(&t);
+
+        strftime(str_time, sizeof(str_time), "[%d/%m/%Y-%H:%M:%S] ", tm);
+        strcpy(log_msg, str_time);
+    }
+
     if (input)
         strcat(log_msg, "> ");
     strcat(log_msg, msg);
@@ -88,11 +91,12 @@ void log_msg(char *msg, bool input, FILE *log_file) {
     fprintf(log_file, log_msg);
 }
 
-void print_and_log(char *msg, bool error, FILE *log_file) {
+void print_and_log(char *msg, bool error, bool log_time, FILE *log_file) {
     if (error)
         fprintf(stderr, msg);
     else
+    
         printf("%s", msg);
     
-    log_msg(msg, false, log_file);
+    log_msg(msg, false, log_time, log_file);
 }

@@ -25,7 +25,7 @@ const char *commands[] = {
 };
 
 
-int command_prompt(char **args, FILE *log_file) {
+int command_prompt(char **args, int *args_nb, FILE *log_file) {
     char input[MAX_INPUT_LENGTH];
     char *command;
     char *arg;
@@ -35,15 +35,15 @@ int command_prompt(char **args, FILE *log_file) {
     // Lire l'entrée de l'utilisateur
     printf("> ");
     fgets(input, MAX_INPUT_LENGTH, stdin);
-    log_msg(input, true, log_file);
+    log_msg(input, true, true, log_file);
 
     // Récupérer la commande
     input[strcspn(input, "\n")] = '\0';
     command = strtok(input, " ");
 
-    for (int i = 0; i < NB_COMMANDS && choice == -1; i++)
-        if (strcmp(command, commands[i]) == 0)
-            choice = i;
+    for (int j = 0; j < NB_COMMANDS && choice == -1; j++)
+        if (strcmp(command, commands[j]) == 0)
+            choice = j;
     
     // Récupérer les arguments si la commande est correcte
     if (choice != -1) {
@@ -51,25 +51,34 @@ int command_prompt(char **args, FILE *log_file) {
             args[i] = arg;
             i++;
         }
-        
+
+        *args_nb = i;
+
         // Effacer les derniers arguments
         while (i < MAX_ARGS) {
             args[i] = NULL;
             i++;
         }
     }
+    else
+        *args_nb = -1;
 
     return choice;
+}
+
+void error_wrong_command(FILE *log_file) {
+    print_and_log("Erreur : Mauvaise entrée. Entrer \"help\" pour plus d'information.\n", true, true, log_file);
 }
 
 int menu(FILE *log_file) {
     bool quit = false;
     char *args[MAX_ARGS];
-
-    printf("Projet avancé Automne 2024 - Equipe 13\n");
+    int args_nb = -1;
+    
+    print_and_log("Projet avancé Automne 2024 - Equipe 13\n", false, true, log_file);
 
     while(!quit) {
-        switch (command_prompt(args, log_file)) {
+        switch (command_prompt(args, &args_nb, log_file)) {
             case 0: //quit
                 quit = true;
                 break;
@@ -80,7 +89,10 @@ int menu(FILE *log_file) {
                 printf("Choix 2\n"); // TEMPORAIRE
                 break;
             case 3: //del-key
-                printf("Choix 3\n"); // TEMPORAIRE
+                if (args_nb == 1)
+                    del_key(log_file, args);
+                else
+                    error_wrong_command(log_file);
                 break;
             case 4: //encrypt
                 printf("Choix 4\n"); // TEMPORAIRE
@@ -95,7 +107,7 @@ int menu(FILE *log_file) {
                 help(log_file);
                 break;
             default:
-                print_and_log("Erreur : Mauvaise entrée. Entrer \"help\" pour plus d'information.\n", true, log_file);
+                error_wrong_command(log_file);
         }
     }
 
