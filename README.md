@@ -22,7 +22,7 @@ Le projet importeras des fonctionnalités de codages-décodage, Cryptographie sy
 ### [Programme principal](src/main.c)
 `./projet_avance_automne_2024`
 
-Commandes :
+#### Commandes :
 - `help` : donne la liste des commandes
 - `list-keys` : donne la liste des clefs générées et disponibles et indique celle qui ont déjà été utilisée
 - (TODO) `gen-key <n>` : génère une clef de longueur n
