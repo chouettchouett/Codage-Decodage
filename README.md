@@ -24,14 +24,13 @@ Le projet importeras des fonctionnalités de codages-décodage, Cryptographie sy
 
 #### Commandes :
 - `help` : donne la liste des commandes
-- `list-keys` : donne la liste des clefs générées et disponibles et indique celle qui ont déjà été utilisée
+- `list-keys` : donne la liste des clefs générées et disponibles et indique celles qui ont déjà été utilisée
 - (TODO) `gen-key <n>` : génère une clef de longueur n
 - `del-key <n_key>` : supprime la clef n° <n_key>
 - (TODO) `encrypt <in> <out> <key> <method> [<vecteurd0 initialisation>]`
 - (TODO) `decrypt <in> <out> <key> <method> [<vecteurd0 initialisation>]`
 - (TODO) `crack <in> <out> <length> <dico>`
 - `quit`
-
 
 ### [Partie 1](src/Partie1)
 TODO
