@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "test_break_code.h"
-#include "break_code.h"
+// remplacer les noms de fichier de victor #include "break_code.h"
 
 /**
  * @brief Test du crack_c1 avec une longueur de clé invalide.
@@ -62,6 +62,12 @@ void test_crack_c2_missing_file();
  * avec une méthode d'analyse fréquentielle valide.
  */
 void test_crack_c2_valid_decryption();
+
+/**
+ * @brief Test de l'analyse frequencielle  
+ * 
+ * Ce test vérifie que le bon fonctionnement de l'analyse fréquentielle
+ */
 void test_analyze_frequency();
 
 /**
