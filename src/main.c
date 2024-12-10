@@ -89,8 +89,10 @@ int menu(FILE *log_file) {
                 printf("Choix 2\n"); // TEMPORAIRE
                 break;
             case 3: //del-key
-                if (args_nb == 1)
-                    del_key(log_file, args);
+                if (args_nb == 1) {
+                    int key_to_del = strtol(args[0], NULL, 10);
+                    del_key(log_file, key_to_del);
+                }
                 else
                     error_wrong_command(log_file);
                 break;

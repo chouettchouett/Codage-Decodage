@@ -5,8 +5,7 @@
 #include "commands.h"
 #include "utils.h"
 
-#define KEYS_LIST_FILE_NAME "keys-list"
-#define KEY_MAX_SIZE 100 // a vérifier
+#define KEY_MAX_SIZE 100
 
 
 void help(FILE *log_file) {
@@ -29,7 +28,7 @@ void list_keys(FILE *log_file) {
     int status;
     char msg[sizeof(int) + KEY_MAX_SIZE + 46];
 
-    if ((key_list_file = fopen(KEYS_LIST_FILE_NAME, "r")) == NULL) {
+    if ((key_list_file = open_file_read("keys-list", false, TMP)) == NULL) {
         print_and_log("Aucune clé n'a été générée pour le moment.\n", false, true, log_file);
         return;
     }
@@ -52,27 +51,27 @@ void list_keys(FILE *log_file) {
 
     if (fclose(key_list_file) != 0) {
         print_and_log("Erreur : list_keys -> fclose()\n", true, true, log_file);
-        return;
+        exit(1);
     }
 }
 
 // Renvoie le nombre de clefs disponibles dans le fichier
-int get_nb_key(FILE *log_file) {
+int get_nb_keys(FILE *log_file) {
     FILE *key_list_file;
     char key[KEY_MAX_SIZE];
     int key_used;
     int nb_key = 0;
 
-    if ((key_list_file = fopen(KEYS_LIST_FILE_NAME, "r")) == NULL) {
-        return nb_key;
+    if ((key_list_file = open_file_read("keys-list", false, TMP)) == NULL) {
+        return -1;
     }
 
-    while (fscanf(key_list_file, "%s %d", key, &key_used) == 0)
+    while (fscanf(key_list_file, "%s %d", key, &key_used) == 2)
         nb_key++;
 
     if (fclose(key_list_file) != 0) {
         print_and_log("Erreur : get_nb_key -> fclose()\n", true, true, log_file);
-        return -1;
+        exit(2);
     }   
 
     return nb_key;
@@ -80,12 +79,35 @@ int get_nb_key(FILE *log_file) {
 
 // TODO : gen-key
 
-void del_key(FILE *log_file, char **args) {
-    if (atoi(args[0]) == -1) {
-        print_and_log("Erreur : Mauvais argument pour del-key\n", true, true, log_file);
+void del_key(FILE *log_file, int key_to_del) {
+    if (key_to_del < 1 || key_to_del > get_nb_keys(log_file)) {
+        print_and_log("Erreur : Numéro de clé incorrect, faire list-keys pour voir les clés disponibles.\n", true, true, log_file);
         return;
     }
-    
-    
-    
+
+    FILE *key_list_file = open_file_read("keys-list", false, TMP);
+    FILE *temp_file = create_file("keys-list-temp", true, TMP);
+    char line[KEY_MAX_SIZE + 3];
+    int i = 1;
+
+    // Ecrit dans un fichier temporaire les autres clés
+    while (fgets(line, sizeof(line), key_list_file) != NULL) {
+        if (i != key_to_del)
+            fputs(line, temp_file);
+        i++;
+    }
+
+    // Supprime l'ancienne liste et renomme la nouvelle
+    if (fclose(key_list_file) != 0) {
+        print_and_log("Erreur : del_key -> fclose(key_list_file)\n", true, true, log_file);
+        exit(3);
+    }
+    if (fclose(temp_file) != 0) {
+        print_and_log("Erreur : del_key -> fclose(temp_file)\n", true, true, log_file);
+        exit(4);
+    }
+    remove("tmp/keys-list");
+    rename("tmp/keys-list-temp", "tmp/keys-list");
+
+    print_and_log("Clé supprimée avec succès.\n", false, true, log_file);
 }
