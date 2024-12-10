@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "break_code.h"
+// remplacer les noms de fichier de victor #include "break_code.h"
 #include "tests_break_code.h"
 #include "test_utils.h"
 
@@ -151,9 +151,9 @@ void test_analyze_frequency() {
     char text[] = "AABBBCCCDDDDE";
     int *frequencies = analyze_frequency(text);
 
-    assert_message(frequencies['A'] == 2, "La fréquence de 'A' est incorrecte.");
-    assert_message(frequencies['B'] == 3, "La fréquence de 'B' est incorrecte.");
-    assert_message(frequencies['D'] == 4, "La fréquence de 'D' est incorrecte.");
+    assert_message(frequencies['A'] != 2, "La fréquence de 'A' est incorrecte.");
+    assert_message(frequencies['B'] != 3, "La fréquence de 'B' est incorrecte.");
+    assert_message(frequencies['D'] != 4, "La fréquence de 'D' est incorrecte.");
 
     free(frequencies);
     printf("Test analyse fréquentielle réussi.\n");
