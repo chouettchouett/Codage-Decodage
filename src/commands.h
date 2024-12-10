@@ -9,6 +9,6 @@ void list_keys(FILE *log_file);
 
 // gen_key
 
-void del_key(FILE *log_file, char **args);
+void del_key(FILE *log_file, int key_to_del);
 
 #endif

@@ -20,7 +20,17 @@ Le projet importeras des fonctionnalités de codages-décodage, Cryptographie sy
 - `make clean_tmp` - Pour supprimer seulement les fichiers objets et les fichiers temporaires.
 
 ### [Programme principal](src/main.c)
-TODO
+`./projet_avance_automne_2024`
+
+#### Commandes :
+- `help` : donne la liste des commandes
+- `list-keys` : donne la liste des clefs générées et disponibles et indique celles qui ont déjà été utilisée
+- (TODO) `gen-key <n>` : génère une clef de longueur n
+- `del-key <n_key>` : supprime la clef n° <n_key>
+- (TODO) `encrypt <in> <out> <key> <method> [<vecteurd0 initialisation>]`
+- (TODO) `decrypt <in> <out> <key> <method> [<vecteurd0 initialisation>]`
+- (TODO) `crack <in> <out> <length> <dico>`
+- `quit`
 
 ### [Partie 1](src/Partie1)
 TODO
