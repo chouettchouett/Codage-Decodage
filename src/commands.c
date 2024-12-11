@@ -80,15 +80,8 @@ int get_nb_keys(FILE *log_file) {
     return nb_key;
 }
 
-void gen_key_main(FILE *log_file, bool dh, int n) {    
-    if (!dh && (n < 1 || n > KEY_MAX_SIZE)) {
-        print_and_log("Erreur : .\n", false, true, log_file);
-        return;
-    }
-
-    char key[KEY_MAX_SIZE + 1];
-
-    if (dh) { // Génération de la clef avec la partie 2
+void gen_key_dh(char *key, FILE *log_file) {
+        // Appel des fonctions et du script python de la partie 2
         dh_gen_group("dh_group_tmp");
 
         if (system("python3 dh_genkey.py -i dh_group_tmp -o dh_key_tmp > /dev/null") != 0) {
@@ -96,7 +89,7 @@ void gen_key_main(FILE *log_file, bool dh, int n) {
             exit(3);
         }
 
-        // On récupère la clef générée
+        // Récupération de la clef générée
         FILE * dh_key_file = open_file_read("dh_key_tmp", TMP);
         
         if (fscanf(dh_key_file, "%s", key) != 1) {
@@ -107,13 +100,23 @@ void gen_key_main(FILE *log_file, bool dh, int n) {
         if (fclose(dh_key_file) != 0) {
             print_and_log("Erreur : gen_key_main -> fclose()\n", true, true, log_file);
             exit(5);   
-        }   
-    }
-    else { // Génération de la clef avec la partie 1
-        strcpy(key, gen_key(n));
+        }
+}
+
+void gen_key_main(FILE *log_file, bool dh, int n) {
+    if (!dh && (n < 1 || n > KEY_MAX_SIZE)) {
+        print_and_log("Erreur : longueur de la clef incorrecte (minimum : 0, maximum : 100)\n", false, true, log_file);
+        return;
     }
 
-    // Ecriture de la clef dans la liste des clefs
+    char key[KEY_MAX_SIZE + 1];
+
+    if (!dh) // Génération de la clef avec la partie 1
+        strcpy(key, gen_key(n));
+    else // Génération de la clef avec la partie 2
+        gen_key_dh(key, log_file);
+
+    // Ajout de la clef dans la liste des clefs
     FILE *key_list_file = create_file("keys_list", false, TMP);
 
     fprintf(key_list_file, "%s %d\n", key, 0);

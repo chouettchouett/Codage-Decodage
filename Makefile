@@ -43,6 +43,7 @@ obj/Partie3%.o: src/Partie3/%.c
 
 $(EXEC): $(OBJ)
 	@$(CC) -o $@ $^ $(LDFLAGS)
+	@cp src/Partie2/dh_genkey.py ./
 
 $(EXEC_PART1): $(OBJ_PART1)
 	@$(CC) -o $@ $^ $(LDFLAGS)
