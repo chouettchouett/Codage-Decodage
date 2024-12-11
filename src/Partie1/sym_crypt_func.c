@@ -33,10 +33,13 @@ const char* MASK_PATH = "./src/Partie1/mask.txt";
 char* gen_key(int length){
 
     char* key = malloc(sizeof(char)*(length+1));
+    int i;
 
     // remplie chaque case mémoire de key d'un élément aléatoire de ALPHA_NUM
-    for(int i=0; i<length; i++)
+    for(i = 0; i < length; i++)
         key[i] = ALPHA_NUM[abs((int)(rand() % ALPHA_NUM_LENGTH))];
+    
+    key[i] = '\0';
     
     return key;
 }
