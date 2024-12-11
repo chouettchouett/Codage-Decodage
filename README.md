@@ -25,7 +25,7 @@ Le projet importeras des fonctionnalités de codages-décodage, Cryptographie sy
 #### Commandes :
 - `help` : donne la liste des commandes
 - `list-keys` : donne la liste des clefs générées et disponibles et indique celles qui ont déjà été utilisée
-- `gen-key <n>` ou `gen-key -dh` : génère une clef de longueur n ou en simulant un échange de Diffie-Hellman (-dh)
+- `gen-key <n>` OU `gen-key -dh` : génère une clef de longueur n OU en simulant un échange de Diffie-Hellman (-dh)
 - `del-key <n_key>` : supprime la clef n° <n_key>
 - (TODO) `encrypt <in> <out> <key> <method> [<vecteurd0 initialisation>]`
 - (TODO) `decrypt <in> <out> <key> <method> [<vecteurd0 initialisation>]`

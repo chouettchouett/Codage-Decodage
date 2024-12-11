@@ -161,10 +161,10 @@ def get_dh_numbers(input_file_name):
         dh_numbers = re.findall(r"\d+", input_file_content)
         
         if len(dh_numbers) != 3:
-            raise ValueError("Le contenu du fichier est invalide.")
+            raise ValueError("Le contenu du fichier est invalide.\n")
     
     except FileNotFoundError:
-        sys.stderr.write("Erreur : le fichier d'entrée n'existe pas.")
+        sys.stderr.write("Erreur : le fichier d'entrée n'existe pas.\n")
         sys.exit(1)
     except ValueError:
         sys.stderr.write("Erreur : le fichier d'entrée est incorrect.\n")

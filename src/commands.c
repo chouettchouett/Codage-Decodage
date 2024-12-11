@@ -31,7 +31,7 @@ void list_keys(FILE *log_file) {
     int status;
     char msg[sizeof(int) + KEY_MAX_SIZE + 46];
 
-    if ((key_list_file = open_file_read("keys-list", false, TMP)) == NULL) {
+    if ((key_list_file = open_file_read("keys_list", TMP)) == NULL) {
         print_and_log("Aucune clef n'a été générée pour le moment.\n", false, true, log_file);
         return;
     }
@@ -65,7 +65,7 @@ int get_nb_keys(FILE *log_file) {
     int key_used;
     int nb_key = 0;
 
-    if ((key_list_file = open_file_read("keys-list", false, TMP)) == NULL) {
+    if ((key_list_file = open_file_read("keys_list", TMP)) == NULL) {
         return -1;
     }
 
@@ -88,12 +88,40 @@ void gen_key_main(FILE *log_file, bool dh, int n) {
 
     char key[KEY_MAX_SIZE + 1];
 
-    if (dh) {
+    if (dh) { // Génération de la clef avec la partie 2
+        dh_gen_group("dh_group_tmp");
 
+        if (system("python3 dh_genkey.py -i dh_group_tmp -o dh_key_tmp > /dev/null") != 0) {
+            print_and_log("Erreur : gen_key_main -> dh_genkey.py", true, true, log_file);
+            exit(3);
+        }
+
+        // On récupère la clef générée
+        FILE * dh_key_file = open_file_read("dh_key_tmp", TMP);
+        
+        if (fscanf(dh_key_file, "%s", key) != 1) {
+            print_and_log("Erreur : gen_key_main -> fscanf()\n", true, true, log_file);
+            exit(4);   
+        }   
+        
+        if (fclose(dh_key_file) != 0) {
+            print_and_log("Erreur : gen_key_main -> fclose()\n", true, true, log_file);
+            exit(5);   
+        }   
     }
-    else {
-        printf("%s\n", gen_key(n));
+    else { // Génération de la clef avec la partie 1
+        strcpy(key, gen_key(n));
     }
+
+    // Ecriture de la clef dans la liste des clefs
+    FILE *key_list_file = create_file("keys_list", false, TMP);
+
+    fprintf(key_list_file, "%s %d\n", key, 0);
+
+    if (fclose(key_list_file) != 0) {
+        print_and_log("Erreur : gen_key_main -> fclose()\n", true, true, log_file);
+        exit(6);   
+    }       
 }
 
 void del_key(FILE *log_file, int key_to_del) {
@@ -102,8 +130,8 @@ void del_key(FILE *log_file, int key_to_del) {
         return;
     }
 
-    FILE *key_list_file = open_file_read("keys-list", false, TMP);
-    FILE *temp_file = create_file("keys-list-temp", true, TMP);
+    FILE *key_list_file = open_file_read("keys_list", TMP);
+    FILE *temp_file = create_file("keys_list_temp", true, TMP);
     char line[KEY_MAX_SIZE + 3];
     int i = 1;
 
@@ -117,14 +145,14 @@ void del_key(FILE *log_file, int key_to_del) {
     // Supprime l'ancienne liste et renomme la nouvelle
     if (fclose(key_list_file) != 0) {
         print_and_log("Erreur : del_key -> fclose(key_list_file)\n", true, true, log_file);
-        exit(3);
+        exit(7);
     }
     if (fclose(temp_file) != 0) {
         print_and_log("Erreur : del_key -> fclose(temp_file)\n", true, true, log_file);
-        exit(4);
+        exit(8);
     }
-    remove("tmp/keys-list");
-    rename("tmp/keys-list-temp", "tmp/keys-list");
+    remove("tmp/keys_list");
+    rename("tmp/keys_list_temp", "tmp/keys_list");
 
     print_and_log("Clef supprimée avec succès.\n", false, true, log_file);
 }

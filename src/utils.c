@@ -69,22 +69,16 @@ FILE *create_file(char *file_name, bool overwrite_file, enum File_Type file_type
     return file;
 }
 
-FILE *open_file_read(char * file_name, bool read_plus, enum File_Type file_type) {
+FILE *open_file_read(char * file_name, enum File_Type file_type) {
     FILE *file;
     char *file_dir = get_file_dir(file_type);
     char file_path[strlen(file_dir) + strlen(file_name)];
-    char *fopen_modes;
 
     strcpy(file_path, file_dir);
     strcat(file_path, file_name);
     create_dir(file_type);
 
-    if (read_plus)
-        fopen_modes = "r+";
-    else
-        fopen_modes = "r";
-
-    file = fopen(file_path, fopen_modes);
+    file = fopen(file_path, "r");
 
     return file;   
 }
