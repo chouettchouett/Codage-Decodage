@@ -49,6 +49,7 @@ int command_prompt(char **args, int *args_nb, FILE *log_file) {
     if (choice != -1) {
         while (i < MAX_ARGS && (arg = strtok(NULL, " ")) != NULL) {
             args[i] = arg;
+            args[i][strlen(args[i])] = '\0';
             i++;
         }
 
@@ -70,6 +71,53 @@ void error_wrong_command(FILE *log_file) {
     print_and_log("Erreur : Mauvaise entrée. Entrer \"help\" pour plus d'information.\n", true, true, log_file);
 }
 
+void call_gen_key(FILE *log_file, char **args, int args_nb) {
+    if (args_nb == 1) {
+        int n;
+        bool dh = false;
+         if (strcmp(args[0], "-dh") == 0) {
+            n = 0;
+            dh = true;
+        }
+        else
+            n = strtol(args[0], NULL, 10);
+        
+        gen_key_main(log_file, dh, n);
+    }
+    else
+        error_wrong_command(log_file);
+}
+
+void call_del_key(FILE *log_file, char **args, int args_nb) {
+    if (args_nb == 1) {
+        int key_to_del = strtol(args[0], NULL, 10);
+        del_key(log_file, key_to_del);
+    }
+    else
+        error_wrong_command(log_file);
+}
+
+void call_encrypt(FILE *log_file, char **args, int args_nb) {
+if (args_nb == 4 || args_nb == 5) {
+        // Préparation des arguments
+        char input[30];
+        char output[30];
+        int key_nb;
+        char method[30];
+        char vect[30];
+
+        strcpy(input, args[0]);
+        strcpy(output, args[1]);
+        key_nb = strtol(args[2], NULL, 10);
+        strcpy(method, args[3]);
+        strcpy(vect, args[4]);
+
+        encrypt(log_file, input, output, key_nb, method, vect);
+    }
+    else
+        error_wrong_command(log_file);
+}
+
 int menu(FILE *log_file) {
     bool quit = false;
     char *args[MAX_ARGS];
@@ -86,32 +134,13 @@ int menu(FILE *log_file) {
                 list_keys(log_file);
                 break;
             case 2: //gen-key
-                if (args_nb == 1) {
-                    int n;
-                    bool dh = false;
-
-                    if (strcmp(args[0], "-dh") == 0) {
-                        n = 0;
-                        dh = true;
-                    }
-                    else
-                        n = strtol(args[0], NULL, 10);
-                    
-                    gen_key_main(log_file, dh, n);
-                }
-                else
-                    error_wrong_command(log_file);
+                call_gen_key(log_file, args, args_nb);
                 break;
             case 3: //del-key
-                if (args_nb == 1) {
-                    int key_to_del = strtol(args[0], NULL, 10);
-                    del_key(log_file, key_to_del);
-                }
-                else
-                    error_wrong_command(log_file);
+                call_del_key(log_file, args, args_nb);
                 break;
             case 4: //encrypt
-                printf("Choix 4\n"); // TEMPORAIRE
+                call_encrypt(log_file, args, args_nb);
                 break;
             case 5: //decrypt
                 printf("Choix 5\n"); // TEMPORAIRE
@@ -126,7 +155,7 @@ int menu(FILE *log_file) {
                 error_wrong_command(log_file);
         }
     }
-
+    
     return 0;
 }
 

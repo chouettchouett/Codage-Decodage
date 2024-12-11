@@ -15,7 +15,7 @@ void help(FILE *log_file) {
     // Affichage de l'aide
     print_and_log("Commandes :\n"
                   "\t- help : donne la liste des commandes\n"
-                  "\t- gen-key <n>` ou `gen-key -dh` : génère une clef de longueur n ou en simulant un échange de Diffie-Hellman (-dh)\n"
+                  "\t- gen-key <n> ou gen-key -dh : génère une clef de longueur n OU génère une clef en simulant un échange de Diffie-Hellman (-dh)\n"
                   "\t- gen-key <n> : génère une clef de longueur n\n"
                   "\t- del-key <n_key> : supprime la clef n° <n_key>\n"
                   "\t- encrypt <in> <out> <key> <method> [<vecteurd0 initialisation>]\n"
@@ -158,4 +158,8 @@ void del_key(FILE *log_file, int key_to_del) {
     rename("tmp/keys_list_temp", "tmp/keys_list");
 
     print_and_log("Clef supprimée avec succès.\n", false, true, log_file);
+}
+
+void encrypt(FILE *log_file, char *input, char *output, int key_nb, char *method, char *vect) {
+    printf("input : %s, output : %s, key_nb : %d, crypt_method : %s, vect : %s\n", input, output, key_nb, method, vect);
 }
