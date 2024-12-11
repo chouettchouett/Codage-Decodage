@@ -8,12 +8,14 @@ void help(FILE *log_file);
 
 void list_keys(FILE *log_file);
 
-void gen_key_main(FILE *log_file, bool dh, int n);
+void gen_key_main(bool dh, int n, FILE *log_file);
 
-void del_key(FILE *log_file, int key_to_del);
+void del_key(int key_to_del, FILE *log_file);
 
-void encrypt(FILE *log_file, char *input, char *output, int key_nb, char *method, char *vect);
+void encrypt(char *input, char *output, int key_nb, char *method, char *vect, FILE *log_file);
 
-void decrypt(FILE *log_file, char *input, char *output, int key_nb, char *method, char *vect);
+void decrypt(char *input, char *output, int key_nb, char *method, char *vect, FILE *log_file);
+
+void crack(char *input, char *output, int length, char *dico, FILE *log_file);
 
 #endif

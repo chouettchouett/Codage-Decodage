@@ -4,7 +4,7 @@
 #include <string.h>
 #include <assert.h>
 #include "tests_dh_gen.h"
-#include "../test_utils.h" //assert_message
+#include "../utils/test_utils.h" //assert_message
 
 // Fonction de test pour l'option -o sans nom de fichier
 void test_option_o_no_filename() {

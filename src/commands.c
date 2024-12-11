@@ -1,14 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 
 #include "commands.h"
-#include "utils.h"
+#include "utils/utils.h"
+#include "utils/keys_utils.h"
 #include "Partie1/sym_crypt_func.h"
-#include "Partie2/dh_gen_group.h"
 //#include "Partie3/?.h"
-
-#define KEY_MAX_SIZE 100
 
 
 void help(FILE *log_file) {
@@ -18,8 +17,8 @@ void help(FILE *log_file) {
                   "\t- gen-key <n> ou gen-key -dh : génère une clef de longueur n OU génère une clef en simulant un échange de Diffie-Hellman (-dh)\n"
                   "\t- gen-key <n> : génère une clef de longueur n\n"
                   "\t- del-key <n_key> : supprime la clef n° <n_key>\n"
-                  "\t- encrypt <in> <out> <key> <method> [<vecteurd0 initialisation>]\n"
-                  "\t- decrypt <in> <out> <key> <method> [<vecteurd0 initialisation>]\n"
+                  "\t- encrypt <in> <out> <key> <method : xor OU mask OU cbc> [<vecteurd0 initialisation>]\n"
+                  "\t- decrypt <in> <out> <key> <method : xor OU mask OU cbc> [<vecteurd0 initialisation>]\n"
                   "\t- crack <in> <out> <length> <dico>\n"
                   "\t- quit\n", false, true, log_file);
 }
@@ -58,52 +57,7 @@ void list_keys(FILE *log_file) {
     }
 }
 
-// Renvoie le nombre de clefs disponibles dans le fichier
-int get_nb_keys(FILE *log_file) {
-    FILE *key_list_file;
-    char key[KEY_MAX_SIZE];
-    int key_used;
-    int nb_key = 0;
-
-    if ((key_list_file = open_file_read("keys_list", TMP)) == NULL) {
-        return -1;
-    }
-
-    while (fscanf(key_list_file, "%s %d", key, &key_used) == 2)
-        nb_key++;
-
-    if (fclose(key_list_file) != 0) {
-        print_and_log("Erreur : get_nb_key -> fclose()\n", true, true, log_file);
-        exit(2);
-    }   
-
-    return nb_key;
-}
-
-void gen_key_dh(char *key, FILE *log_file) {
-        // Appel des fonctions et du script python de la partie 2
-        dh_gen_group("dh_group_tmp");
-
-        if (system("python3 dh_genkey.py -i dh_group_tmp -o dh_key_tmp > /dev/null") != 0) {
-            print_and_log("Erreur : gen_key_main -> dh_genkey.py", true, true, log_file);
-            exit(3);
-        }
-
-        // Récupération de la clef générée
-        FILE * dh_key_file = open_file_read("dh_key_tmp", TMP);
-        
-        if (fscanf(dh_key_file, "%s", key) != 1) {
-            print_and_log("Erreur : gen_key_main -> fscanf()\n", true, true, log_file);
-            exit(4);   
-        }   
-        
-        if (fclose(dh_key_file) != 0) {
-            print_and_log("Erreur : gen_key_main -> fclose()\n", true, true, log_file);
-            exit(5);   
-        }
-}
-
-void gen_key_main(FILE *log_file, bool dh, int n) {
+void gen_key_main(bool dh, int n, FILE *log_file) {
     if (!dh && (n < 1 || n > KEY_MAX_SIZE)) {
         print_and_log("Erreur : longueur de la clef incorrecte (minimum : 0, maximum : 100)\n", false, true, log_file);
         return;
@@ -122,7 +76,7 @@ void gen_key_main(FILE *log_file, bool dh, int n) {
 
     if (fclose(key_list_file) != 0) {
         print_and_log("Erreur : gen_key_main -> fclose()\n", true, true, log_file);
-        exit(6);   
+        exit(2);   
     }
 
     // Affichage de la nouvelle clef
@@ -134,7 +88,7 @@ void gen_key_main(FILE *log_file, bool dh, int n) {
     print_and_log(msg, false, true, log_file);  
 }
 
-void del_key(FILE *log_file, int key_to_del) {
+void del_key(int key_to_del, FILE *log_file) {
     if (key_to_del < 1 || key_to_del > get_nb_keys(log_file)) {
         print_and_log("Numéro de clef incorrect, faire list-keys pour voir les clefs disponibles.\n", false, true, log_file);
         return;
@@ -155,88 +109,16 @@ void del_key(FILE *log_file, int key_to_del) {
     // Supprime l'ancienne liste et renomme la nouvelle
     if (fclose(key_list_file) != 0) {
         print_and_log("Erreur : del_key -> fclose(key_list_file)\n", true, true, log_file);
-        exit(7);
+        exit(3);
     }
     if (fclose(temp_file) != 0) {
         print_and_log("Erreur : del_key -> fclose(temp_file)\n", true, true, log_file);
-        exit(8);
+        exit(4);
     }
     remove("tmp/keys_list");
     rename("tmp/keys_list_temp", "tmp/keys_list");
 
     print_and_log("Clef supprimée avec succès.\n", false, true, log_file);
-}
-
-// Renvoie la n ième clef de la liste des clefs
-char *get_key(FILE *log_file, int key_nb) {
-    if (key_nb < 1 || key_nb > get_nb_keys(log_file)) {
-        print_and_log("Numéro de clef incorrect, faire list-keys pour voir les clefs disponibles.\n", false, true, log_file);
-        return NULL;
-    }    
-
-    FILE *key_list_file;
-    char key_temp[KEY_MAX_SIZE];
-    int used_temp;
-
-    if ((key_list_file = open_file_read("keys_list", TMP)) == NULL) {
-        print_and_log("La clef n'existe pas car aucune clef n'a été générée pour le moment.\n", true, true, log_file);
-        return NULL;
-    }
-
-    for (int i = 0; i != key_nb; i++) {
-       if (fscanf(key_list_file, "%s %d", key_temp, &used_temp) != 2) {
-            print_and_log("Erreur : clef introuvable dans le fichier.\n", true, true, log_file);
-            fclose(key_list_file);
-            exit(9);
-        }
-    }
-
-    if (fclose(key_list_file) != 0) {
-        print_and_log("Erreur : get_nb_key -> fclose()\n", true, true, log_file);
-        exit(10);
-    }
-
-    char *key = malloc(strlen(key_temp) + 1);
-    strcpy(key, key_temp);
-
-    return key;
-}
-
-// Met à 1 l'utilisation de la n ième clef dans la liste
-void set_key_used(FILE *log_file, int key_nb, char *key) {
-    if (key_nb < 1 || key_nb > get_nb_keys(log_file)) {
-        print_and_log("Numéro de clef incorrect, faire list-keys pour voir les clefs disponibles.\n", false, true, log_file);
-        return;
-    }
-
-    FILE *key_list_file = open_file_read("keys_list", TMP);
-    FILE *temp_file = create_file("keys_list_temp", true, TMP);
-    char line[KEY_MAX_SIZE + 3];
-    int i = 1;
-
-    // Ecrit dans un fichier temporaire la liste mise à jour
-    while (fgets(line, sizeof(line), key_list_file) != NULL) {
-        if (i != key_nb)
-            fputs(line, temp_file);
-        else {
-            strcpy(line, key);
-            strcat(line, " 1\n");
-            fputs(line, temp_file);
-        }
-        i++;
-    }
-
-    // Supprime l'ancienne liste et renomme la nouvelle
-    if (fclose(key_list_file) != 0) {
-        print_and_log("Erreur : del_key -> fclose(key_list_file)\n", true, true, log_file);
-        exit(7);
-    }
-    if (fclose(temp_file) != 0) {
-        print_and_log("Erreur : del_key -> fclose(temp_file)\n", true, true, log_file);
-        exit(8);
-    }
-    remove("tmp/keys_list");
-    rename("tmp/keys_list_temp", "tmp/keys_list");
 }
 
 int get_crypt_method(char *method) {
@@ -252,11 +134,11 @@ int get_crypt_method(char *method) {
     return crypt_method;
 }
 
-void encrypt(FILE *log_file, char *input, char *output, int key_nb, char *method, char *vect) {    
+void encrypt(char *input, char *output, int key_nb, char *method, char *vect, FILE *log_file) {    
     char *key;
     
     // Récupère la clef choisie
-    if ((key = get_key(log_file, key_nb)) == NULL)
+    if ((key = get_key(key_nb, log_file)) == NULL)
         return;
 
     switch (get_crypt_method(method)) {
@@ -275,18 +157,18 @@ void encrypt(FILE *log_file, char *input, char *output, int key_nb, char *method
     }
     
     // Enregistrer dans la liste que la clef à été utilisée
-    set_key_used(log_file, key_nb, key);
+    set_key_used(key_nb, key, log_file);
 
     free(key);
 
     print_and_log("Cryptage effectué avec succès.\n", false, true, log_file);
 }
 
-void decrypt(FILE *log_file, char *input, char *output, int key_nb, char *method, char *vect) {
+void decrypt(char *input, char *output, int key_nb, char *method, char *vect, FILE *log_file) {
     char *key;
     
     // Récupère la clef choisie
-    if ((key = get_key(log_file, key_nb)) == NULL)
+    if ((key = get_key(key_nb, log_file)) == NULL)
         return;
 
     switch (get_crypt_method(method)) {
@@ -307,4 +189,8 @@ void decrypt(FILE *log_file, char *input, char *output, int key_nb, char *method
     free(key);
 
     print_and_log("Décryptage effectué avec succès.\n", false, true, log_file);
+}
+
+void crack(char *input, char *output, int length, char *dico, FILE *log_file) {
+    printf("Fonction crack - input : %s, output : %s, length : %d, dico : %s\n", input, output, length, dico); // Temp
 }

@@ -3,11 +3,8 @@
 #include <string.h>
 #include <stdbool.h>
 
-#include "utils.h"
+#include "utils/utils.h"
 #include "commands.h"
-#include "Partie1/sym_crypt_func.h"
-#include "Partie2/dh_gen_group.h"
-//#include "Partie3/?.h"
 
 #define MAX_INPUT_LENGTH 200 // ?
 #define MAX_ARGS 5
@@ -24,6 +21,61 @@ const char *commands[] = {
     "help"
 };
 
+void error_wrong_command(FILE *log_file) {
+    print_and_log("Erreur : Mauvaise entrée. Entrer \"help\" pour plus d'information.\n", true, true, log_file);
+}
+
+void call_gen_key(char **args, int args_nb, FILE *log_file) {
+    if (args_nb == 1) {
+        int n;
+        bool dh = false;
+         if (strcmp(args[0], "-dh") == 0) {
+            n = 0;
+            dh = true;
+        }
+        else
+            n = strtol(args[0], NULL, 10);
+        
+        gen_key_main(dh, n, log_file);
+    }
+    else
+        error_wrong_command(log_file);
+}
+
+void call_del_key(char **args, int args_nb, FILE *log_file) {
+    if (args_nb == 1) {
+        int key_to_del = strtol(args[0], NULL, 10);
+        del_key(key_to_del, log_file);
+    }
+    else
+        error_wrong_command(log_file);
+}
+
+void call_encrypt_or_decrypt(char **args, int args_nb, int command, FILE *log_file) {
+    if (args_nb == 4 || args_nb == 5) {
+        int key_nb = strtol(args[2], NULL, 10);
+
+        if (command == 1) {
+            encrypt(args[0], args[1], key_nb, args[3], args[4], log_file);
+            return;
+        }
+        if (command == 2) {
+            decrypt(args[0], args[1], key_nb, args[3], args[4], log_file);
+            return;
+        }
+    }
+    error_wrong_command(log_file);
+}
+
+void call_crack(char **args, int args_nb, FILE *log_file) {
+    if (args_nb == 4) {
+        int length = strtol(args[2], NULL, 10);
+
+        crack(args[0], args[1], length, args[3], log_file);
+    }
+    else
+        error_wrong_command(log_file);
+}
 
 int command_prompt(char **args, int *args_nb, FILE *log_file) {
     char input[MAX_INPUT_LENGTH];
@@ -63,52 +115,6 @@ int command_prompt(char **args, int *args_nb, FILE *log_file) {
     return choice;
 }
 
-void error_wrong_command(FILE *log_file) {
-    print_and_log("Erreur : Mauvaise entrée. Entrer \"help\" pour plus d'information.\n", true, true, log_file);
-}
-
-void call_gen_key(FILE *log_file, char **args, int args_nb) {
-    if (args_nb == 1) {
-        int n;
-        bool dh = false;
-         if (strcmp(args[0], "-dh") == 0) {
-            n = 0;
-            dh = true;
-        }
-        else
-            n = strtol(args[0], NULL, 10);
-        
-        gen_key_main(log_file, dh, n);
-    }
-    else
-        error_wrong_command(log_file);
-}
-
-void call_del_key(FILE *log_file, char **args, int args_nb) {
-    if (args_nb == 1) {
-        int key_to_del = strtol(args[0], NULL, 10);
-        del_key(log_file, key_to_del);
-    }
-    else
-        error_wrong_command(log_file);
-}
-
-void call_encrypt_or_decrypt(FILE *log_file, char **args, int args_nb, int command) {
-if (args_nb == 4 || args_nb == 5) {
-        int key_nb = strtol(args[2], NULL, 10);
-
-        if (command == 1) {
-            encrypt(log_file, args[0], args[1], key_nb, args[3], args[4]);
-            return;
-        }
-        if (command == 2) {
-            decrypt(log_file, args[0], args[1], key_nb, args[3], args[4]);
-            return;
-        }
-    }
-    error_wrong_command(log_file);
-}
-
 int menu(FILE *log_file) {
     bool quit = false;
     char *args[MAX_ARGS];
@@ -125,19 +131,19 @@ int menu(FILE *log_file) {
                 list_keys(log_file);
                 break;
             case 2: //gen-key
-                call_gen_key(log_file, args, args_nb);
+                call_gen_key(args, args_nb, log_file);
                 break;
             case 3: //del-key
-                call_del_key(log_file, args, args_nb);
+                call_del_key(args, args_nb, log_file);
                 break;
             case 4: //encrypt
-                call_encrypt_or_decrypt(log_file, args, args_nb, 1);
+                call_encrypt_or_decrypt(args, args_nb, 1, log_file);
                 break;
             case 5: //decrypt
-                call_encrypt_or_decrypt(log_file, args, args_nb, 2);
+                call_encrypt_or_decrypt(args, args_nb, 2, log_file);
                 break;
             case 6: //crack
-                printf("Choix 6\n"); // TEMPORAIRE          
+                call_crack(args, args_nb, log_file);
                 break;
             case 7: //help
                 help(log_file);

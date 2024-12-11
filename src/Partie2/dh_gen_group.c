@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 
-#include "../utils.h"
+#include "../utils/utils.h"
 #include "dh_gen_group.h"
 #include "dh_prime.h"
 

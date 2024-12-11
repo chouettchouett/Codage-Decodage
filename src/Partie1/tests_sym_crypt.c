@@ -5,7 +5,7 @@
 #include <time.h>  
 #include "sym_crypt_func.h"
 #include "tests_sym_crypt.h"
-#include "../test_utils.h" //assert_message
+#include "../utils/test_utils.h" //assert_message
 
 void test_xor() {
     char message[] = "Hello World!";
