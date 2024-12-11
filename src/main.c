@@ -48,18 +48,14 @@ int command_prompt(char **args, int *args_nb, FILE *log_file) {
     // Récupérer les arguments si la commande est correcte
     if (choice != -1) {
         while (i < MAX_ARGS && (arg = strtok(NULL, " ")) != NULL) {
-            args[i] = arg;
-            args[i][strlen(args[i])] = '\0';
+            args[i] = malloc(strlen(arg) + 1);
+            if (args[i] != NULL) {
+                strcpy(args[i], arg);
+            }
             i++;
         }
 
         *args_nb = i;
-
-        // Effacer les derniers arguments
-        while (i < MAX_ARGS) {
-            args[i] = NULL;
-            i++;
-        }
     }
     else
         *args_nb = -1;
@@ -97,25 +93,20 @@ void call_del_key(FILE *log_file, char **args, int args_nb) {
         error_wrong_command(log_file);
 }
 
-void call_encrypt(FILE *log_file, char **args, int args_nb) {
+void call_encrypt_or_decrypt(FILE *log_file, char **args, int args_nb, int command) {
 if (args_nb == 4 || args_nb == 5) {
-        // Préparation des arguments
-        char input[30];
-        char output[30];
-        int key_nb;
-        char method[30];
-        char vect[30];
+        int key_nb = strtol(args[2], NULL, 10);
 
-        strcpy(input, args[0]);
-        strcpy(output, args[1]);
-        key_nb = strtol(args[2], NULL, 10);
-        strcpy(method, args[3]);
-        strcpy(vect, args[4]);
-
-        encrypt(log_file, input, output, key_nb, method, vect);
+        if (command == 1) {
+            encrypt(log_file, args[0], args[1], key_nb, args[3], args[4]);
+            return;
+        }
+        if (command == 2) {
+            decrypt(log_file, args[0], args[1], key_nb, args[3], args[4]);
+            return;
+        }
     }
-    else
-        error_wrong_command(log_file);
+    error_wrong_command(log_file);
 }
 
 int menu(FILE *log_file) {
@@ -140,10 +131,10 @@ int menu(FILE *log_file) {
                 call_del_key(log_file, args, args_nb);
                 break;
             case 4: //encrypt
-                call_encrypt(log_file, args, args_nb);
+                call_encrypt_or_decrypt(log_file, args, args_nb, 1);
                 break;
             case 5: //decrypt
-                printf("Choix 5\n"); // TEMPORAIRE
+                call_encrypt_or_decrypt(log_file, args, args_nb, 2);
                 break;
             case 6: //crack
                 printf("Choix 6\n"); // TEMPORAIRE          
@@ -154,8 +145,10 @@ int menu(FILE *log_file) {
             default:
                 error_wrong_command(log_file);
         }
+        for (int i = 0; i < args_nb; i++)
+            free(args[i]);
     }
-    
+
     return 0;
 }
 

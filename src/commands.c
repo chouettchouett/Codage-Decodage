@@ -118,13 +118,20 @@ void gen_key_main(FILE *log_file, bool dh, int n) {
 
     // Ajout de la clef dans la liste des clefs
     FILE *key_list_file = create_file("keys_list", false, TMP);
-
     fprintf(key_list_file, "%s %d\n", key, 0);
 
     if (fclose(key_list_file) != 0) {
         print_and_log("Erreur : gen_key_main -> fclose()\n", true, true, log_file);
         exit(6);   
-    }       
+    }
+
+    // Affichage de la nouvelle clef
+    char msg[KEY_MAX_SIZE + 45];
+    strcpy(msg, "Nouvelle clef (= ");
+    strcat(msg, key);
+    strcat(msg, ") générée avec succès.\n");
+
+    print_and_log(msg, false, true, log_file);  
 }
 
 void del_key(FILE *log_file, int key_to_del) {
@@ -160,6 +167,144 @@ void del_key(FILE *log_file, int key_to_del) {
     print_and_log("Clef supprimée avec succès.\n", false, true, log_file);
 }
 
-void encrypt(FILE *log_file, char *input, char *output, int key_nb, char *method, char *vect) {
-    printf("input : %s, output : %s, key_nb : %d, crypt_method : %s, vect : %s\n", input, output, key_nb, method, vect);
+// Renvoie la n ième clef de la liste des clefs
+char *get_key(FILE *log_file, int key_nb) {
+    if (key_nb < 1 || key_nb > get_nb_keys(log_file)) {
+        print_and_log("Numéro de clef incorrect, faire list-keys pour voir les clefs disponibles.\n", false, true, log_file);
+        return NULL;
+    }    
+
+    FILE *key_list_file;
+    char key_temp[KEY_MAX_SIZE];
+    int used_temp;
+
+    if ((key_list_file = open_file_read("keys_list", TMP)) == NULL) {
+        print_and_log("La clef n'existe pas car aucune clef n'a été générée pour le moment.\n", true, true, log_file);
+        return NULL;
+    }
+
+    for (int i = 0; i != key_nb; i++) {
+       if (fscanf(key_list_file, "%s %d", key_temp, &used_temp) != 2) {
+            print_and_log("Erreur : clef introuvable dans le fichier.\n", true, true, log_file);
+            fclose(key_list_file);
+            exit(9);
+        }
+    }
+
+    if (fclose(key_list_file) != 0) {
+        print_and_log("Erreur : get_nb_key -> fclose()\n", true, true, log_file);
+        exit(10);
+    }
+
+    char *key = malloc(strlen(key_temp) + 1);
+    strcpy(key, key_temp);
+
+    return key;
+}
+
+// Met à 1 l'utilisation de la n ième clef dans la liste
+void set_key_used(FILE *log_file, int key_nb, char *key) {
+    if (key_nb < 1 || key_nb > get_nb_keys(log_file)) {
+        print_and_log("Numéro de clef incorrect, faire list-keys pour voir les clefs disponibles.\n", false, true, log_file);
+        return;
+    }
+
+    FILE *key_list_file = open_file_read("keys_list", TMP);
+    FILE *temp_file = create_file("keys_list_temp", true, TMP);
+    char line[KEY_MAX_SIZE + 3];
+    int i = 1;
+
+    // Ecrit dans un fichier temporaire la liste mise à jour
+    while (fgets(line, sizeof(line), key_list_file) != NULL) {
+        if (i != key_nb)
+            fputs(line, temp_file);
+        else {
+            strcpy(line, key);
+            strcat(line, " 1\n");
+            fputs(line, temp_file);
+        }
+        i++;
+    }
+
+    // Supprime l'ancienne liste et renomme la nouvelle
+    if (fclose(key_list_file) != 0) {
+        print_and_log("Erreur : del_key -> fclose(key_list_file)\n", true, true, log_file);
+        exit(7);
+    }
+    if (fclose(temp_file) != 0) {
+        print_and_log("Erreur : del_key -> fclose(temp_file)\n", true, true, log_file);
+        exit(8);
+    }
+    remove("tmp/keys_list");
+    rename("tmp/keys_list_temp", "tmp/keys_list");
+}
+
+int get_crypt_method(char *method) {
+    int crypt_method = -1;
+
+    if (strcmp(method, "xor") == 0)
+        crypt_method = 0;
+    else if (strcmp(method, "mask") == 0)
+        crypt_method = 1;
+    else if (strcmp(method, "cbc") == 0)
+        crypt_method = 2;
+
+    return crypt_method;
+}
+
+void encrypt(FILE *log_file, char *input, char *output, int key_nb, char *method, char *vect) {    
+    char *key;
+    
+    // Récupère la clef choisie
+    if ((key = get_key(log_file, key_nb)) == NULL)
+        return;
+
+    switch (get_crypt_method(method)) {
+        case 0: // Appel encrypt XOR
+            printf("Appel XOR\n");
+            break;
+        case 1: // Appel encrypt MASK
+            printf("Appel MASK\n");
+            break;
+        case 2: // Appel encrypt CBC
+            printf("Appel CBC\n");
+            break;   
+        default:
+            print_and_log("Erreur : Méthode entrée incorrecte. Entrer \"help\" pour plus d'information .\n", true, true, log_file);
+            return;
+    }
+    
+    // Enregistrer dans la liste que la clef à été utilisée
+    set_key_used(log_file, key_nb, key);
+
+    free(key);
+
+    print_and_log("Cryptage effectué avec succès.\n", false, true, log_file);
+}
+
+void decrypt(FILE *log_file, char *input, char *output, int key_nb, char *method, char *vect) {
+    char *key;
+    
+    // Récupère la clef choisie
+    if ((key = get_key(log_file, key_nb)) == NULL)
+        return;
+
+    switch (get_crypt_method(method)) {
+        case 0: // Appel decrypt XOR
+            printf("Appel XOR\n");
+            break;
+        case 1: // Appel decrypt MASK
+            printf("Appel MASK\n");
+            break;
+        case 2: // Appel decrypt CBC
+            printf("Appel CBC\n");
+            break;   
+        default:
+            print_and_log("Erreur : Méthode entrée incorrecte. Entrer \"help\" pour plus d'information .\n", true, true, log_file);
+            return;
+    }
+
+    free(key);
+
+    print_and_log("Décryptage effectué avec succès.\n", false, true, log_file);
 }
