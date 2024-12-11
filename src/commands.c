@@ -4,6 +4,9 @@
 
 #include "commands.h"
 #include "utils.h"
+#include "Partie1/sym_crypt_func.h"
+#include "Partie2/dh_gen_group.h"
+//#include "Partie3/?.h"
 
 #define KEY_MAX_SIZE 100
 
@@ -12,7 +15,7 @@ void help(FILE *log_file) {
     // Affichage de l'aide
     print_and_log("Commandes :\n"
                   "\t- help : donne la liste des commandes\n"
-                  "\t- list-keys : donne la liste des clefs générées et disponibles et indique celle qui ont déjà été utilisée\n"
+                  "\t- gen-key <n>` ou `gen-key -dh` : génère une clef de longueur n ou en simulant un échange de Diffie-Hellman (-dh)\n"
                   "\t- gen-key <n> : génère une clef de longueur n\n"
                   "\t- del-key <n_key> : supprime la clef n° <n_key>\n"
                   "\t- encrypt <in> <out> <key> <method> [<vecteurd0 initialisation>]\n"
@@ -77,11 +80,25 @@ int get_nb_keys(FILE *log_file) {
     return nb_key;
 }
 
-// TODO : gen-key
+void gen_key_main(FILE *log_file, bool dh, int n) {    
+    if (!dh && (n < 1 || n > KEY_MAX_SIZE)) {
+        print_and_log("Erreur : .\n", false, true, log_file);
+        return;
+    }
+
+    char key[KEY_MAX_SIZE + 1];
+
+    if (dh) {
+
+    }
+    else {
+        printf("%s\n", gen_key(n));
+    }
+}
 
 void del_key(FILE *log_file, int key_to_del) {
     if (key_to_del < 1 || key_to_del > get_nb_keys(log_file)) {
-        print_and_log("Erreur : Numéro de clef incorrect, faire list-keys pour voir les clefs disponibles.\n", true, true, log_file);
+        print_and_log("Numéro de clef incorrect, faire list-keys pour voir les clefs disponibles.\n", false, true, log_file);
         return;
     }
 

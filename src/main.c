@@ -86,7 +86,21 @@ int menu(FILE *log_file) {
                 list_keys(log_file);
                 break;
             case 2: //gen-key
-                printf("Choix 2\n"); // TEMPORAIRE
+                if (args_nb == 1) {
+                    int n;
+                    bool dh = false;
+
+                    if (strcmp(args[0], "-dh") == 0) {
+                        n = 0;
+                        dh = true;
+                    }
+                    else
+                        n = strtol(args[0], NULL, 10);
+                    
+                    gen_key_main(log_file, dh, n);
+                }
+                else
+                    error_wrong_command(log_file);
                 break;
             case 3: //del-key
                 if (args_nb == 1) {
