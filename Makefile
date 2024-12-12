@@ -8,9 +8,9 @@ CFLAGS = -std=c99 -Wextra -Wall -pedantic
 LDFLAGS = -lm
 
 SRC = $(wildcard src/*.c) $(SRC_UTILS) $(filter-out src/Partie1/sym_crypt.c src/Partie2/main_part2.c src/Partie3/main_part3.c, $(SRC_PART1) $(SRC_PART2) $(SRC_PART3))
-SRC_PART1 = $(wildcard src/Partie1/*.c) $(filter-out src/utils/keys_utils.c, $(SRC_UTILS))
-SRC_PART2 = $(wildcard src/Partie2/*.c) $(filter-out src/utils/keys_utils.c, $(SRC_UTILS))
-SRC_PART3 = $(wildcard src/Partie3/*.c) $(filter-out src/utils/keys_utils.c, $(SRC_UTILS))
+SRC_PART1 = $(wildcard src/Partie1/*.c) $(filter-out src/utils/commands_utils.c, $(SRC_UTILS))
+SRC_PART2 = $(wildcard src/Partie2/*.c) $(filter-out src/utils/commands_utils.c, $(SRC_UTILS))
+SRC_PART3 = $(wildcard src/Partie3/*.c) $(filter-out src/utils/commands_utils.c, $(SRC_UTILS))
 SRC_UTILS = $(wildcard src/utils/*.c) 
 
 OBJ= $(SRC:src/%.c=obj/%.o)

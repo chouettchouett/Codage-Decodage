@@ -6,10 +6,11 @@
 #include "utils/utils.h"
 #include "commands.h"
 
-#define MAX_INPUT_LENGTH 200 // ?
+#define MAX_INPUT_LENGTH 200
 #define MAX_ARGS 5
-#define NB_COMMANDS 8 // Toutes les commandes possibles :
+#define NB_COMMANDS 8
 
+// Toutes les commandes possibles :
 const char *commands[] = {
     "quit",
     "list-keys",
@@ -101,12 +102,10 @@ int command_prompt(char **args, int *args_nb, FILE *log_file) {
     if (choice != -1) {
         while (i < MAX_ARGS && (arg = strtok(NULL, " ")) != NULL) {
             args[i] = malloc(strlen(arg) + 1);
-            if (args[i] != NULL) {
+            if (args[i] != NULL)
                 strcpy(args[i], arg);
-            }
             i++;
         }
-
         *args_nb = i;
     }
     else

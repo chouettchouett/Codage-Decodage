@@ -4,7 +4,6 @@
 #include <stdio.h>
 #include <stdbool.h>
 
-
 enum File_Type {
     TMP,
     LOG,

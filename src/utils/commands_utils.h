@@ -1,5 +1,5 @@
-#ifndef KEYS_UTILS_H
-#define KEYS_UTILS_H
+#ifndef COMMANDS_UTILS_H
+#define COMMANDS_UTILS_H
 
 #include <stdio.h>
 #include <stdbool.h>
@@ -17,5 +17,8 @@ char *get_key(int key_nb, FILE *log_file);
 
 // Met à 1 l'utilisation de la n-ième clef de la liste
 void set_key_used(int key_nb, char *key, FILE *log_file);
+
+// Renvoie le numéro associé à la métode
+int get_crypt_method(char *method);
 
 #endif

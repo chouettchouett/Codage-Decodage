@@ -5,7 +5,7 @@
 
 #include "commands.h"
 #include "utils/utils.h"
-#include "utils/keys_utils.h"
+#include "utils/commands_utils.h"
 #include "Partie1/sym_crypt_func.h"
 //#include "Partie3/?.h"
 
@@ -45,7 +45,7 @@ void list_keys(FILE *log_file) {
             strcat(msg, "oui\n");
         else
             strcat(msg, "non\n");
-        // Affichage de la clef  
+        // Affichage de la clef et si elle à déjà été utilisée
         print_and_log(msg, false, false, log_file);
 
         status = fscanf(key_list_file, "%s %d", key, &key_used);
@@ -121,20 +121,6 @@ void del_key(int key_to_del, FILE *log_file) {
     print_and_log("Clef supprimée avec succès.\n", false, true, log_file);
 }
 
-// Renvoie le numéro associé à la métode
-int get_crypt_method(char *method) {
-    int crypt_method = -1;
-
-    if (strcmp(method, "xor") == 0)
-        crypt_method = 0;
-    else if (strcmp(method, "mask") == 0)
-        crypt_method = 1;
-    else if (strcmp(method, "cbc") == 0)
-        crypt_method = 2;
-
-    return crypt_method;
-}
-
 void encrypt(char *input, char *output, int key_nb, char *method, char *vect, FILE *log_file) {    
     char *key;
     
@@ -144,13 +130,13 @@ void encrypt(char *input, char *output, int key_nb, char *method, char *vect, FI
 
     switch (get_crypt_method(method)) {
         case 0: // Appel encrypt XOR
-            printf("Appel encrypt XOR - Non compatible pour l'instant\n");
+            printf("Appel encrypt XOR - Non compatible pour le moment\n");
             break;
         case 1: // Appel encrypt MASK
-            printf("Appel encrypt MASK - Non compatible pour l'instant\n");
+            printf("Appel encrypt MASK - Non compatible pour le moment\n");
             break;
         case 2: // Appel encrypt CBC
-            printf("Appel encrypt CBC - Non compatible pour l'instant\n");
+            printf("Appel encrypt CBC - Non compatible pour le moment\n");
             break;   
         default:
             print_and_log("Erreur : Méthode entrée incorrecte. Entrer \"help\" pour plus d'information .\n", true, true, log_file);
@@ -175,13 +161,13 @@ void decrypt(char *input, char *output, int key_nb, char *method, char *vect, FI
 
     switch (get_crypt_method(method)) {
         case 0: // Appel decrypt XOR
-            printf("Appel decrypt XOR - Non compatible pour l'instant\n");
+            printf("Appel decrypt XOR - Non compatible pour le moment\n");
             break;
         case 1: // Appel decrypt MASK
-            printf("Appel decrypt MASK - Non compatible pour l'instant\n");
+            printf("Appel decrypt MASK - Non compatible pour le moment\n");
             break;
         case 2: // Appel decrypt CBC
-            printf("Appel decrypt CBC - Non compatible pour l'instant\n");
+            printf("Appel decrypt CBC - Non compatible pour le moment\n");
             break;   
         default:
             print_and_log("Erreur : Méthode entrée incorrecte. Entrer \"help\" pour plus d'information .\n", true, true, log_file);
@@ -195,5 +181,5 @@ void decrypt(char *input, char *output, int key_nb, char *method, char *vect, FI
 }
 
 void crack(char *input, char *output, int key_length, char *dico, FILE *log_file) {
-    printf("Appel crack - Non compatible pour l'instant\n");
+    printf("Appel crack - Non compatible pour le moment\n");
 }

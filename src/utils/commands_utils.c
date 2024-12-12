@@ -3,7 +3,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "keys_utils.h"
+#include "commands_utils.h"
 #include "utils.h"
 #include "../Partie2/dh_gen_group.h"
 
@@ -121,4 +121,17 @@ void set_key_used(int key_nb, char *key, FILE *log_file) {
     }
     remove("tmp/keys_list");
     rename("tmp/keys_list_temp", "tmp/keys_list");
+}
+
+int get_crypt_method(char *method) {
+    int crypt_method = -1;
+
+    if (strcmp(method, "xor") == 0)
+        crypt_method = 0;
+    else if (strcmp(method, "mask") == 0)
+        crypt_method = 1;
+    else if (strcmp(method, "cbc") == 0)
+        crypt_method = 2;
+
+    return crypt_method;
 }
