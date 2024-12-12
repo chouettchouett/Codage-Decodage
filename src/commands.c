@@ -121,6 +121,7 @@ void del_key(int key_to_del, FILE *log_file) {
     print_and_log("Clef supprimée avec succès.\n", false, true, log_file);
 }
 
+// Renvoie le numéro associé à la métode
 int get_crypt_method(char *method) {
     int crypt_method = -1;
 
@@ -143,16 +144,17 @@ void encrypt(char *input, char *output, int key_nb, char *method, char *vect, FI
 
     switch (get_crypt_method(method)) {
         case 0: // Appel encrypt XOR
-            printf("Appel XOR\n");
+            printf("Appel encrypt XOR - Non compatible pour l'instant\n");
             break;
         case 1: // Appel encrypt MASK
-            printf("Appel MASK\n");
+            printf("Appel encrypt MASK - Non compatible pour l'instant\n");
             break;
         case 2: // Appel encrypt CBC
-            printf("Appel CBC\n");
+            printf("Appel encrypt CBC - Non compatible pour l'instant\n");
             break;   
         default:
             print_and_log("Erreur : Méthode entrée incorrecte. Entrer \"help\" pour plus d'information .\n", true, true, log_file);
+            free(key);
             return;
     }
     
@@ -161,7 +163,7 @@ void encrypt(char *input, char *output, int key_nb, char *method, char *vect, FI
 
     free(key);
 
-    print_and_log("Cryptage effectué avec succès.\n", false, true, log_file);
+    //print_and_log("Cryptage effectué avec succès.\n", false, true, log_file);
 }
 
 void decrypt(char *input, char *output, int key_nb, char *method, char *vect, FILE *log_file) {
@@ -173,24 +175,25 @@ void decrypt(char *input, char *output, int key_nb, char *method, char *vect, FI
 
     switch (get_crypt_method(method)) {
         case 0: // Appel decrypt XOR
-            printf("Appel XOR\n");
+            printf("Appel decrypt XOR - Non compatible pour l'instant\n");
             break;
         case 1: // Appel decrypt MASK
-            printf("Appel MASK\n");
+            printf("Appel decrypt MASK - Non compatible pour l'instant\n");
             break;
         case 2: // Appel decrypt CBC
-            printf("Appel CBC\n");
+            printf("Appel decrypt CBC - Non compatible pour l'instant\n");
             break;   
         default:
             print_and_log("Erreur : Méthode entrée incorrecte. Entrer \"help\" pour plus d'information .\n", true, true, log_file);
+            free(key);
             return;
     }
 
     free(key);
 
-    print_and_log("Décryptage effectué avec succès.\n", false, true, log_file);
+    //print_and_log("Décryptage effectué avec succès.\n", false, true, log_file);
 }
 
-void crack(char *input, char *output, int length, char *dico, FILE *log_file) {
-    printf("Fonction crack - input : %s, output : %s, length : %d, dico : %s\n", input, output, length, dico); // Temp
+void crack(char *input, char *output, int key_length, char *dico, FILE *log_file) {
+    printf("Appel crack - Non compatible pour l'instant\n");
 }

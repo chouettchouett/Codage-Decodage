@@ -16,6 +16,6 @@ void encrypt(char *input, char *output, int key_nb, char *method, char *vect, FI
 
 void decrypt(char *input, char *output, int key_nb, char *method, char *vect, FILE *log_file);
 
-void crack(char *input, char *output, int length, char *dico, FILE *log_file);
+void crack(char *input, char *output, int key_length, char *dico, FILE *log_file);
 
 #endif
