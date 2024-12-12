@@ -7,10 +7,10 @@ Dans le cadre de l'UE Projet avancé (automne 2024), nous devons produire un pro
 - Des jeux de tests pour chaque parties.
 
 ## Participants
-- [Marcq Léo](https://github.com/chouettchouett) : tests, visibilité et cohérence.
+- [MARCQ Léo](https://github.com/chouettchouett) : tests, visibilité et cohérence.
 - [BARBERO Kylian](https://github.com/kylian-bbo) : programme principal, partie 2, Makefile, README et organisation du dépôt.
 - [CENDREZ Enzo](https://github.com/MKZenit) : partie 1.
-- [Bertrand--Torres Victor](https://github.com/victorgh31) : partie 3.
+- [BERTRAND--TORRES Victor](https://github.com/victorgh31) : partie 3.
 
 ## Utilisation
 ### [Makefile](Makefile)
