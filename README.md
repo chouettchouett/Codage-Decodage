@@ -33,7 +33,8 @@ Dans le cadre de l'UE Projet avancé (automne 2024), nous devons produire un pro
 - `quit`
 
 ### [Partie 1](src/Partie1)
-`./crypto_sym -i <input> -o <output> -k <key> -m <method : xor OU mask OU cbc> [-v <vect>] [-l <log>] [-h]`
+- `./crypto_sym -i <input> -o <output> -k <key> -m <method : xor OU mask OU cbc> [-v <vect>] [-l <log>] [-h]`
+- `./crypto_sym -t` : Pour lancer les tests.
 
 ### [Partie 2](src/Partie2)
 #### C :
