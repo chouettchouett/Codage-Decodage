@@ -1,4 +1,4 @@
-KEY_PATH ./key.txt
-INPUT_PATH ./input.txt
-OUTPUT_PATH ./output.txt
-INIT_VECTOR ./init_vector.txt
+KEY_PATH ./src/Partie1/key.txt
+INPUT_PATH ./data/message.txt
+OUTPUT_PATH ./data/crypted.txt
+INIT_VECTOR_PATH 

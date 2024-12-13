@@ -29,7 +29,7 @@ void set_config(char* key_path, char* input_path, char* output_path, char* init_
     fwrite("\n", sizeof(char), 1, fd);
     
     fwrite(INIT_VECTOR_STR, sizeof(char), INIT_VECTOR_STR_LENGTH, fd);
-    fwrite(init_vector_path, sizeof(char), strlen(init_vector_path), fd);
+    if(init_vector_path!=NULL) fwrite(init_vector_path, sizeof(char), strlen(init_vector_path), fd);
     fwrite("\n", sizeof(char), 1, fd);
     
     fclose(fd);
@@ -38,6 +38,7 @@ void set_config(char* key_path, char* input_path, char* output_path, char* init_
 void get_config(char* key_path, char* input_path, char* output_path, char* init_vector_path){
     FILE* fd = fopen("./src/Partie1/config.txt", "rb");
 
+    
     fseek(fd, KEY_STR_LENGTH, SEEK_CUR);
     fread(key_path, sizeof(char), strlen(key_path), fd);
     fseek(fd, 1, SEEK_CUR); // \n
@@ -51,7 +52,7 @@ void get_config(char* key_path, char* input_path, char* output_path, char* init_
     fseek(fd, 1, SEEK_CUR); // \n
     
     fseek(fd, INIT_VECTOR_STR_LENGTH, SEEK_CUR);
-    fread(init_vector_path, sizeof(char), strlen(init_vector_path), fd);
+    if(init_vector_path!=NULL) fread(init_vector_path, sizeof(char), strlen(init_vector_path), fd);
     fseek(fd, 1, SEEK_CUR); // \n
 
     fclose(fd);

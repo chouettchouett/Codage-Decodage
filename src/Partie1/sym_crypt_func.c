@@ -1,4 +1,5 @@
 #include "sym_crypt_func.h"
+#include "sym_crypt_utils.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -51,7 +52,7 @@ int xor(char* message, char* key){
         fprintf(stderr, "xor : key length 0\n");
         return -1;
     }
-    int message_length = strlen(message);
+    int message_length = strlen(message); // INFO : s'arretera éventuellement avant la fin si utilisé sur un message crypté
     
     for(int i=0; i<message_length; i++)
         message[i] = (char)(message[i]^key[i%key_length]);
@@ -59,93 +60,65 @@ int xor(char* message, char* key){
     return 0;
 }
 
+int xor_length(char* message, char* key, int length){
+    int key_length = strlen(key);
+    if(key_length==0){ 
+        fprintf(stderr, "xor : key length 0\n");
+        return -1;
+    }
+    int message_length = length; //
+    
+    for(int i=0; i<message_length; i++)
+        message[i] = (char)(message[i]^key[i%key_length]);
+
+    return 0;
+}
 
 #pragma region FILE_UTILITIES
 
-#define MASK_CHAR_LENGTH 5
-
-int save_length_indicator(int fd, int length, int value){
-    char curMaskLengthChar;
-    int curMaskLength = value;
-    
-    for(int i=0; i<length; i++){
-        curMaskLengthChar = (curMaskLength%10);
-        curMaskLength = (curMaskLength/10);
-        if(write(fd, &curMaskLengthChar, sizeof(char))==-1){
-            perror("write");
-            return -1;
-        }
-    }
-    return 0;
-}
-
-int fetch_length_indicator(int fd, int length, int* value){
-    char curNumber;
-    if(read(fd, &curNumber, sizeof(char)) ==-1){
-        perror("read");
-        return -1;
-    }
-    int mask_size = curNumber-'0';
-    
-    // Récupération de l'indicateur de taille du mask
-    for(int i=1; i<length; i++){
-        if(read(fd, &curNumber, sizeof(char)) ==-1){
-            perror("read");
-            return -1;
-        }
-        mask_size += (int)( (curNumber-'0')*(pow(10, i)) );
-    }
-    *value = mask_size;
-    return 0;
-}
-
 int save_mask(char* mask, int mask_length){
 
-    remove(MASK_PATH);
-    fclose(fopen(MASK_PATH, "a"));
-    chmod(MASK_PATH, S_IRWXU);
-
-    int fd = open(MASK_PATH, O_WRONLY | O_APPEND | O_CREAT);
-    if(fd==-1){
+    FILE* fd = fopen(MASK_PATH, "wb");
+    if(fd==NULL){
         perror("open");
         return -1;
     }
 
-    // Ecriture d'un indicateur de la longueur du mask
-    if(save_length_indicator(fd, MASK_CHAR_LENGTH, mask_length)==-1) return -1;
-
-    // Ecriture du mask lui même
-    if(write(fd, mask, sizeof(char)*mask_length) ==-1){
+    // Ecriture du mask
+    if(fwrite(mask, sizeof(char), mask_length, fd) ==-1){
         perror("write");
         return -1;
     }
 
-    close(fd);
+    fclose(fd);
     return 0;
 }
 
-char* fetch_mask(){
+char* fetch_mask(char* mask_path, int* length){
 
     // Ouverture du fichier
-    int fd = open(MASK_PATH, O_RDONLY);
-    if(fd==-1){
+    FILE* fd = fopen(mask_path, "rb");
+    if(fd==NULL){
         perror("open");
         return NULL;
     }
 
     // Récupération de la longueur du mask
-    int mask_size;
-    if(fetch_length_indicator(fd, MASK_CHAR_LENGTH, &mask_size)==-1) return NULL;
-    
+    struct stat S;
+    stat(mask_path, &S);
+    int mask_size = S.st_size;
+    *length = S.st_size;
+
     // Lecture du mask
     char* mask = malloc(sizeof(char)*(mask_size+1));
-    if(read(fd, mask, sizeof(char)*mask_size) ==-1){
+    mask[mask_size*sizeof(char)]='\0';
+    if(fread(mask, sizeof(char), mask_size, fd) ==-1){
         perror("read");
         return NULL;
     }
 
     // Fermeture du fichier
-    if(close(fd) ==-1){
+    if(fclose(fd) ==-1){
         perror("close");
         return NULL;
     }
@@ -153,50 +126,160 @@ char* fetch_mask(){
     return mask;
 }
 
+
+
 #pragma endregion FILE_UTILITIES
 
 int mask_xor_crypt(char* message){
 
-    int length = strlen(message);
-
-    // Génération du mask
+    int length;
     char* mask;
-    if( (mask=gen_key(length)) ==NULL){
-        fprintf(stderr, "mask_xor_uncrypt : went wrong\n");
-        return -1;
-    }
+    if(message!=NULL){ // appel direct
+        length = strlen(message);
 
-    // Cryptage du message en utilisant le mask
-    if(xor(message, mask) ==-1){
-        fprintf(stderr, "mask_xor_uncrypt : went wrong\n");
-        return -1;
-    }
+        // Génération du mask
+        if( (mask=gen_key(length)) ==NULL){
+            fprintf(stderr, "mask_xor_uncrypt : went wrong\n");
+            return -1;
+        }
 
-    // Stockage du mask
-    if(save_mask(mask, length) ==-1){
-        fprintf(stderr, "mask_xor_uncrypt : went wrong\n");
-        return -1;
+        // Cryptage du message en utilisant le mask
+        if(xor_length(message, mask, length) ==-1){
+            fprintf(stderr, "mask_xor_uncrypt : went wrong\n");
+            return -2;
+        }
+        
+        // Stockage du mask
+        if(save_mask(mask, length) ==-1){
+            fprintf(stderr, "mask_xor_uncrypt : went wrong\n");
+            return -3;
+        }
+    }else{ // appel par le main, config is set
+        
+        char* key_path, input_path, output_path;
+        get_config(key_path, input_path, output_path, NULL);
+
+        struct stat key_s, input_s;
+        stat(key_path, &key_s);
+        stat(input_path, &input_s);
+        if(key_s.st_size < input_s.st_size){
+            fprintf(stderr, "key size less than message size, impossible for a mask crypt.\n");
+            return -4;
+        }
+        length = input_s.st_size;
+
+        FILE* key_fd = fopen(key_path, "rb");
+        FILE* input_fd = fopen(input_path, "rb");
+        FILE* output_fd = fopen(output_path, "wb");
+
+        mask=malloc(sizeof(char)*length+1);
+        mask[length] = '\0';
+        
+        // Lecture du mask
+        if( fread(mask, sizeof(char), length, key_fd)<=0){
+            fprintf(stderr, "mask_xor_uncrypt : went wrong\n");
+            return -5;
+        }
+        
+        // Lecture du message
+        if( fread(mask, sizeof(char), length, input_fd)<=0){
+            fprintf(stderr, "mask_xor_uncrypt : went wrong\n");
+            return -6;
+        }
+
+        // Cryptage du message en utilisant le mask
+        if(xor_length(message, mask, length) ==-1){
+            fprintf(stderr, "mask_xor_uncrypt : went wrong\n");
+            return -7;
+        }
+
+        // Ecriture du message crypté
+        if(fwrite(message, sizeof(char), length, output_fd)<length){
+            fprintf(stderr, "mask_xor_uncrypt : went wrong\n");
+            return -8;
+        }
+
+        fclose(key_fd);
+        fclose(input_fd);
+        fclose(output_fd);
     }
 
     // Déallocation du mask
     free(mask);
-
+    
     return 0;
 }
 
 int mask_xor_uncrypt(char* message){
 
-    // Récupération du dernier mask stocké
-    char* mask = fetch_mask();
-    if(mask ==NULL){
-        fprintf(stderr, "mask_xor_uncrypt : went wrong\n");
-        return -1;
-    }
+    char* mask;
+    int length;
 
-    // Decryptage du message en utilisant le mask
-    if(xor(message, mask) ==-1){
-        fprintf(stderr, "mask_xor_uncrypt : went wrong\n");
-        return -1;
+    if(message!=NULL){ // appel direct
+
+        // Récupération du dernier mask stocké
+        mask = fetch_mask(MASK_PATH, &length);
+        if(mask ==NULL){
+            fprintf(stderr, "mask_xor_uncrypt : went wrong\n");
+            return -1;
+        }
+
+        // Decryptage du message en utilisant le mask
+        if(xor_length(message, mask, length) ==-1){
+            fprintf(stderr, "mask_xor_uncrypt : went wrong\n");
+            return -2;
+        }
+
+        length = strlen(message);
+        
+        // Stockage du mask
+        if(save_mask(mask, length) ==-1){
+            fprintf(stderr, "mask_xor_uncrypt : went wrong\n");
+            return -3;
+        }
+    }else{ // appel par le main, config is set
+        
+        char* key_path, input_path, output_path;
+        get_config(key_path, input_path, output_path, NULL);
+
+        struct stat key_s, input_s;
+        stat(key_path, &key_s);
+        stat(input_path, &input_s);
+        if(key_s.st_size < input_s.st_size){
+            fprintf(stderr, "key size less than message size, impossible for a mask crypt.\n");
+            return -4;
+        }
+        length = input_s.st_size;
+
+        FILE* input_fd = fopen(input_path, "rb");
+        FILE* output_fd = fopen(output_path, "wb");
+
+        // Récupération du mask stocké
+        if((mask=fetch_mask(key_path, &length)) ==NULL){
+            fprintf(stderr, "mask_xor_uncrypt : went wrong\n");
+            return -5;
+        }
+        
+        // Lecture du message
+        if( fread(mask, sizeof(char), length, input_fd)<=0){
+            fprintf(stderr, "mask_xor_uncrypt : went wrong\n");
+            return -6;
+        }
+
+        // Cryptage du message en utilisant le mask
+        if(xor_length(message, mask, length) ==-1){
+            fprintf(stderr, "mask_xor_uncrypt : went wrong\n");
+            return -7;
+        }
+
+        // Ecriture du message crypté
+        if(fwrite(message, sizeof(char), length, output_fd)<length){
+            fprintf(stderr, "mask_xor_uncrypt : went wrong\n");
+            return -8;
+        }
+
+        fclose(input_fd);
+        fclose(output_fd);
     }
 
     // Déallocation du mask
