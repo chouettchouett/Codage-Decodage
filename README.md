@@ -33,8 +33,7 @@ Dans le cadre de l'UE Projet avancé (automne 2024), nous devons produire un pro
 - `quit`
 
 ### [Partie 1](src/Partie1)
-- `./crypto_sym -i <input> -o <output> -k <key> -m <method : xor OU mask OU cbc> [-v <vect>] [-l <log>]`
-- `./crypto_sym -h` - Pour afficher l'aide.
+- `./sym_crypt -i nom_fichier_message -o nom_fichier_chiffré [-k clef | f fichier_clé] -m nom_methode [-v vecteur_init]`
 - `./crypto_sym -t` : Pour lancer les tests.
 
 ### [Partie 2](src/Partie2)

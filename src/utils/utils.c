@@ -100,12 +100,12 @@ void log_msg(char *msg, bool input, bool log_time, FILE *log_file) {
         strcat(msg_to_log, "> ");
     strcat(msg_to_log, msg);
 
-    fprintf(log_file, msg_to_log);
+    fprintf(log_file, "%s", msg_to_log);
 }
 
 void print_and_log(char *msg, bool error, bool log_time, FILE *log_file) {
     if (error)
-        fprintf(stderr, msg);
+        fprintf(stderr, "%s", msg);
     else
     
         printf("%s", msg);

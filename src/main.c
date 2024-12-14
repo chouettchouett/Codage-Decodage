@@ -163,7 +163,7 @@ int main () {
     menu(log_file);
 
     if (fclose(log_file) != 0) {
-            fprintf(stderr, "Erreur : fclose(log_file)\n");
+            fprintf(stderr, "%s", "Erreur : fclose(log_file)\n");
             exit(1);
     }
 
