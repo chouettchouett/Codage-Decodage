@@ -67,7 +67,7 @@ int xor(char* message, char* key){
         char* input_path = malloc(sizeof(char)*100);
         char* output_path = malloc(sizeof(char)*100);
 
-        get_config(key_path, input_path, output_path, NULL);
+        get_config(key_path, input_path, output_path);
 
         struct stat key_s, input_s;
         stat(key_path, &key_s);
@@ -205,7 +205,7 @@ int mask_xor_crypt(char* message){
         char* input_path = malloc(sizeof(char)*100);
         char* output_path = malloc(sizeof(char)*100);
 
-        get_config(key_path, input_path, output_path, NULL);
+        get_config(key_path, input_path, output_path);
 
         struct stat key_s, input_s;
         stat(key_path, &key_s);
@@ -302,14 +302,13 @@ int mask_xor_uncrypt(char* message){
         }
     }else{ // Lecture dans le fichier config
         
-        char* key_path = malloc(sizeof(char)*100);
         char* input_path = malloc(sizeof(char)*100);
         char* output_path = malloc(sizeof(char)*100);
 
-        get_config(key_path, input_path, output_path, NULL);
+        get_config(NULL, input_path, output_path);
 
         struct stat key_s, input_s;
-        stat(key_path, &key_s);
+        stat(MASK_PATH, &key_s);
         stat(input_path, &input_s);
         if(key_s.st_size < input_s.st_size){
             fprintf(stderr, "key size less than message size, impossible for a mask crypt.\n");
@@ -321,7 +320,7 @@ int mask_xor_uncrypt(char* message){
         FILE* output_fd = fopen(output_path, "wb");
 
         // Récupération du mask stocké
-        if((mask=fetch_mask(key_path, &length)) ==NULL){
+        if((mask=fetch_mask(MASK_PATH, &length)) ==NULL){
             fprintf(stderr, "mask_xor_uncrypt : went wrong\n");
             return -5;
         }
@@ -347,6 +346,9 @@ int mask_xor_uncrypt(char* message){
 
         fclose(input_fd);
         fclose(output_fd);
+
+        free(input_path);
+        free(output_path);
 
         free(m);
     }

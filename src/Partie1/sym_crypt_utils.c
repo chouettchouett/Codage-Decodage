@@ -13,7 +13,7 @@
 #define OUTPUT_STR_LENGTH strlen(OUTPUT_STR)
 #define INIT_VECTOR_STR_LENGTH strlen(INIT_VECTOR_STR)
 
-void set_config(char* key_path, char* input_path, char* output_path, char* init_vector_path){
+void set_config(char* key_path, char* input_path, char* output_path){
     FILE* fd = fopen("./src/Partie1/config.txt", "wb");
 
     fwrite(KEY_STR, sizeof(char), KEY_STR_LENGTH, fd);
@@ -26,10 +26,6 @@ void set_config(char* key_path, char* input_path, char* output_path, char* init_
 
     fwrite(OUTPUT_STR, sizeof(char), OUTPUT_STR_LENGTH, fd);
     fwrite(output_path, sizeof(char), strlen(output_path), fd);
-    fwrite("\n", sizeof(char), 1, fd);
-    
-    fwrite(INIT_VECTOR_STR, sizeof(char), INIT_VECTOR_STR_LENGTH, fd);
-    if(init_vector_path!=NULL) fwrite(init_vector_path, sizeof(char), strlen(init_vector_path), fd);
     fwrite("\n", sizeof(char), 1, fd);
     
     fclose(fd);
@@ -54,28 +50,19 @@ void GetConfigLine(char** path, FILE* fd){
 }
 
 
-void get_config(char* key_path, char* input_path, char* output_path, char* init_vector_path){
+void get_config(char* key_path, char* input_path, char* output_path){
     FILE* fd = fopen("./src/Partie1/config.txt", "rb");
 
     char* line;
-    int len;
 
     GetConfigLine(&line, fd);
-    strcpy(key_path, line+KEY_STR_LENGTH);
+    if(key_path!=NULL) strcpy(key_path, line+KEY_STR_LENGTH);
     
     GetConfigLine(&line, fd);
-    strcpy(input_path, line+INPUT_STR_LENGTH);
+    if(input_path!=NULL) strcpy(input_path, line+INPUT_STR_LENGTH);
     
     GetConfigLine(&line, fd);
-    strcpy(output_path, line+OUTPUT_STR_LENGTH);
-
-    if(init_vector_path!=NULL){
-        GetConfigLine(&line, fd);
-        len = strlen(line);
-        *init_vector_path = malloc(sizeof(char)*(len-INIT_VECTOR_STR_LENGTH));
-        strncpy(*init_vector_path, line+INIT_VECTOR_STR_LENGTH, len-INIT_VECTOR_STR_LENGTH-1);
-        init_vector_path[len-INIT_VECTOR_STR_LENGTH]='\0';
-    }
+    if(output_path!=NULL) strcpy(output_path, line+OUTPUT_STR_LENGTH);
 
     fclose(fd);
 }

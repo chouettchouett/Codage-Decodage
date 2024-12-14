@@ -11,7 +11,7 @@ int argc_;
 char** argv_;
 
 #define WRONG_ARGS "Wrong arguments : ./sym_crypt -i nom_fichier_message \
--o nom_fichier_chiffré -[k clef | f fichier_clé] -m nom_methode [-v nom_fichier_vecteur_init]\n"
+-o nom_fichier_chiffré -[k clef | f fichier_clé] -m nom_methode [-v vecteur_init]\n"
 
 
 
@@ -39,7 +39,7 @@ int main(int argc, char* argv[]) {
         int k = HasArgument("-k");// -k clef
         int f = HasArgument("-f");// OU  -f fichier_clé
         int m = HasArgument("-m");// -m nom_methode (parmis xor, cbc-crypt, cbc-uncrypt, mask-crypt, mask-uncrypt)
-        int v = HasArgument("-v");// -v nom_fichier_vecteur_init
+        int v = HasArgument("-v");// -v vecteur_init
         
         // Vérifications d'erreurs simples
         if((i==-1)
@@ -71,13 +71,14 @@ int main(int argc, char* argv[]) {
         printf("set_config...\n");
         set_config(key_path, input_path, output_path, init_vector);
 
+        if(k!=-1){
+            FILE* fd = fopen(key_path, "wb");
+            fwrite(argv[k+1], sizeof(char), strlen(argv[k+1]), fd);
+            fclose(fd);
+        }
+
         // Appel de la fonction correspondant à la méthode demandée
         if(strcmp(method, "xor")==0){
-            if(k!=-1){
-                FILE* fd = fopen(key_path, "wb");
-                fwrite(argv[k+1], sizeof(char), strlen(argv[k+1]), fd);
-                fclose(fd);
-            }
             printf("xor...\n");
             xor(NULL, NULL);
         }else if(strcmp(method, "cbc-crypt")==0){

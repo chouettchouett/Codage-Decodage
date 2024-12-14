@@ -85,7 +85,7 @@ FILE *open_file_read(char * file_name, enum File_Type file_type) {
 
 void log_msg(char *msg, bool input, bool log_time, FILE *log_file) {
     char str_time[23];
-    char log_msg[3 + sizeof(str_time) + strlen(msg)];
+    char _log_msg[3 + sizeof(str_time) + strlen(msg)];
 
     // Ajout de l'heure si nécessaire
     if (log_time) {
@@ -93,14 +93,14 @@ void log_msg(char *msg, bool input, bool log_time, FILE *log_file) {
         struct tm *tm = localtime(&t);
 
         strftime(str_time, sizeof(str_time), "[%d/%m/%Y-%H:%M:%S] ", tm);
-        strcpy(log_msg, str_time);
+        strcpy(_log_msg, str_time);
     }
 
     if (input)
-        strcat(log_msg, "> ");
-    strcat(log_msg, msg);
+        strcat(_log_msg, "> ");
+    strcat(_log_msg, msg);
 
-    fprintf(log_file, log_msg);
+    fprintf(log_file, _log_msg);
 }
 
 void print_and_log(char *msg, bool error, bool log_time, FILE *log_file) {
