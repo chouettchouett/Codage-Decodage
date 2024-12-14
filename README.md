@@ -50,3 +50,4 @@ Dans le cadre de l'UE Projet avancé (automne 2024), nous devons produire un pro
 ### [Partie 3](src/Partie3)
 - `./break_code -i <input> -m <method : c1 OU all> -k <key length> [-d <dict>] [-l <log>]`
 - `./break_code -h` - Pour afficher l'aide.
+- `./break_code -t` : Pour lancer les tests.
