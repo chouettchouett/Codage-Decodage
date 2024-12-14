@@ -22,29 +22,6 @@ int HasArgument(char* c){
     return -1;
 }
 
-// Generalized xor function using the config.txt file
-int xor_func(char* key, char* input_path, char* output_path){
-    
-    FILE* fd_input = fopen(input_path, "rb");
-    FILE* fd_output = fopen(output_path, "wb");
-    if((fd_input==NULL)
-     || fd_output==NULL){
-        fprintf(stderr, "Unable to open file\n");
-        return -1;
-    }
-    int key_length = strlen(key);
-
-    char* message;
-    while(fread(message, sizeof(char), key_length, fd_input)){
-        if(xor(message, key)==-1) return -1;
-        fwrite(message, sizeof(char), key_length, fd_output);
-    }
-
-    fclose(fd_input);
-    fclose(fd_output);
-    return 0;
-}
-
 
 #define KEY_PATH "./src/Partie1/key.txt"
 #define INIT_VECTOR_PATH "./src/Partie1/init_vector.txt"
@@ -94,30 +71,32 @@ int main(int argc, char* argv[]) {
         printf("set_config...\n");
         set_config(key_path, input_path, output_path, init_vector);
 
-        printf("methode choisie : %s", argv[m+1]);
         // Appel de la fonction correspondant à la méthode demandée
         if(strcmp(method, "xor")==0){
-            printf("xor...\n");
             if(k!=-1){
                 FILE* fd = fopen(key_path, "wb");
                 fwrite(argv[k+1], sizeof(char), strlen(argv[k+1]), fd);
                 fclose(fd);
             }
-            xor_func(NULL, NULL, NULL);
-        }if(strcmp(method, "cbc-crypt")==0){
+            printf("xor...\n");
+            xor(NULL, NULL);
+        }else if(strcmp(method, "cbc-crypt")==0){
             printf("cbc-crypt...\n");
             // TODO : key filepath ?
             cbc_crypt(NULL, NULL, NULL);
-        }if(strcmp(method, "cbc-uncrypt")==0){
+        }else if(strcmp(method, "cbc-uncrypt")==0){
             printf("cbc-uncrypt...\n");
             // TODO : key filepath ?
             cbc_uncrypt(NULL, NULL, NULL);
-        }if(strcmp(method, "mask-crypt")==0){
+        }else if(strcmp(method, "mask-crypt")==0){
             printf("mask-crypt...\n");
             mask_xor_crypt(NULL);
-        }if(strcmp(method, "mask-uncrypt")==0){
+        }else if(strcmp(method, "mask-uncrypt")==0){
             printf("mask-uncrypt...\n");
             mask_xor_uncrypt(NULL);
+        }else {
+            fprintf(stderr, "Wrong method name, it should be either one of :\nxor\nmask-crypt\nmask-uncrypt\ncbc-crypt\ncbc-uncrypt\n");
+            return 1;
         }
     }
     else if( argc==2){

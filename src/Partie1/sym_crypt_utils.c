@@ -35,25 +35,47 @@ void set_config(char* key_path, char* input_path, char* output_path, char* init_
     fclose(fd);
 }
 
+void GetConfigLine(char** path, FILE* fd){
+    const int maxLineLength = 199;
+    int curIndex = 0;
+    char curChar;
+    char* p = malloc(sizeof(char)*(maxLineLength+1));
+
+    fread(&curChar, sizeof(char), 1, fd);
+    p[curIndex] = curChar;
+    while((curIndex<maxLineLength)
+        && ((curChar!='\n')&&(curChar!='\0')) ){
+        curIndex++;
+        fread(&curChar, sizeof(char), 1, fd);
+        p[curIndex] = curChar;
+    }
+    p[curIndex] = '\0';
+    *path = p;
+}
+
+
 void get_config(char* key_path, char* input_path, char* output_path, char* init_vector_path){
     FILE* fd = fopen("./src/Partie1/config.txt", "rb");
 
-    
-    fseek(fd, KEY_STR_LENGTH, SEEK_CUR);
-    fread(key_path, sizeof(char), strlen(key_path), fd);
-    fseek(fd, 1, SEEK_CUR); // \n
-    
-    fseek(fd, INPUT_STR_LENGTH, SEEK_CUR);
-    fread(input_path, sizeof(char), strlen(input_path), fd);
-    fseek(fd, 1, SEEK_CUR); // \n
+    char* line;
+    int len;
 
-    fseek(fd, OUTPUT_STR_LENGTH, SEEK_CUR);
-    fread(output_path, sizeof(char), strlen(output_path), fd);
-    fseek(fd, 1, SEEK_CUR); // \n
+    GetConfigLine(&line, fd);
+    strcpy(key_path, line+KEY_STR_LENGTH);
     
-    fseek(fd, INIT_VECTOR_STR_LENGTH, SEEK_CUR);
-    if(init_vector_path!=NULL) fread(init_vector_path, sizeof(char), strlen(init_vector_path), fd);
-    fseek(fd, 1, SEEK_CUR); // \n
+    GetConfigLine(&line, fd);
+    strcpy(input_path, line+INPUT_STR_LENGTH);
+    
+    GetConfigLine(&line, fd);
+    strcpy(output_path, line+OUTPUT_STR_LENGTH);
+
+    if(init_vector_path!=NULL){
+        GetConfigLine(&line, fd);
+        len = strlen(line);
+        *init_vector_path = malloc(sizeof(char)*(len-INIT_VECTOR_STR_LENGTH));
+        strncpy(*init_vector_path, line+INIT_VECTOR_STR_LENGTH, len-INIT_VECTOR_STR_LENGTH-1);
+        init_vector_path[len-INIT_VECTOR_STR_LENGTH]='\0';
+    }
 
     fclose(fd);
 }

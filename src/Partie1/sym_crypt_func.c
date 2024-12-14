@@ -16,18 +16,6 @@
 const char* MASK_PATH = "./src/Partie1/mask.txt";
 #define CBC_MASK_LENGTH 16
 
-//TODO : modifier toutes les lectures de clé, elles seront désormais effectuées dans un fichier.
-//TODO : utiliser une variable globale pour déterminer le filepath du fichier
-
-//TODO : variables globales des fichiers d' I/O
-
-// TODO : lecture de l'init-vector dans un fichier pour les fonctions cbc;
-    // Ajouter une fonction pour ce faire (pour ne pas invalider les tests)
-
-// TODO : mask-crypt & mask-uncrypt => mask (les tests seront innévitablement invalidés)
-    // Cependant on a tjrs : appliquer 2 fois mask() => retour au message de base
-// TODO : I/O : gen_key, mask
-
 //Note importante : quand mask_crypt ou cbc_crypt est appelé, les masques précédents sont détruits
     // Ainsi, utiliser un mask_xor puis un cbc_crypt effacera les données du mask_xor
 
@@ -46,30 +34,88 @@ char* gen_key(int length){
 }
 
 int xor(char* message, char* key){
-    
-    int key_length = strlen(key);
-    if(key_length==0){ 
-        fprintf(stderr, "xor : key length 0\n");
-        return -1;
-    }
-    int message_length = strlen(message); // INFO : s'arretera éventuellement avant la fin si utilisé sur un message crypté
-    
-    for(int i=0; i<message_length; i++)
-        message[i] = (char)(message[i]^key[i%key_length]);
+    if((message!=NULL) && (key!=NULL)){ // Utilisation normale
+        int key_length = strlen(key);
+        if(key_length==0){ 
+            fprintf(stderr, "xor : key length 0\n");
+            return -1;
+        }
+        int message_length = strlen(message);
+        // INFO : s'arretera éventuellement avant la fin si utilisé sur un message crypté
+            // (contenant éventuellement \0)
+        
+        for(int i=0; i<message_length; i++)
+            message[i] = (char)(message[i]^key[i%key_length]);
 
+        return 0;
+    }else{ // Lecture dans le fichier config
+        char* key_path = malloc(sizeof(char)*100);
+        char* input_path = malloc(sizeof(char)*100);
+        char* output_path = malloc(sizeof(char)*100);
+
+        get_config(key_path, input_path, output_path, NULL);
+
+        struct stat key_s, input_s;
+        stat(key_path, &key_s);
+        stat(input_path, &input_s);
+        int key_length = key_s.st_size;
+        int message_length = input_s.st_size;
+
+        FILE* key_fd = fopen(key_path, "rb");
+        FILE* input_fd = fopen(input_path, "rb");
+        FILE* output_fd = fopen(output_path, "wb");
+
+        if((key_fd==NULL)
+        || (input_fd==NULL)
+        || (output_fd==NULL)){
+            perror("xor fopen :");
+            fprintf(stderr, "Unable to open config files\nxor : went wrong\n");
+            return 1;
+        }
+
+        char* m = malloc(sizeof(char)*(message_length+1));
+        if( fread(m, sizeof(char), message_length, input_fd)<=0){
+            fprintf(stderr, "xor : went wrong\n");
+            return 1;
+        }
+        char* k = malloc(sizeof(char)*(key_length+1));
+        if( fread(k, sizeof(char), key_length, key_fd)<=0){
+            fprintf(stderr, "xor : went wrong\n");
+            return 1;
+        }
+        k[key_length]='\0';
+
+        if(xor_length(m, k, message_length)!=0){
+            fprintf(stderr, "xor : went wrong\n");
+            return 1;
+        }
+
+        if( fwrite(m, sizeof(char), message_length, output_fd)<=0){
+            fprintf(stderr, "xor : went wrong\n");
+            return 1;
+        }
+
+        fclose(key_fd);
+        fclose(input_fd);
+        fclose(output_fd);
+
+        free(key_path);
+        free(input_path);
+        free(output_path);
+    }
     return 0;
 }
 
+// Is limited to an alphanumeric key (no character \0)
 int xor_length(char* message, char* key, int length){
     int key_length = strlen(key);
     if(key_length==0){ 
         fprintf(stderr, "xor : key length 0\n");
         return -1;
     }
-    int message_length = length; //
     
-    for(int i=0; i<message_length; i++)
-        message[i] = (char)(message[i]^key[i%key_length]);
+    for(int i=0; i<length; i++)
+        message[i] = (char)(message[i]^key[i%(key_length+1)]);
 
     return 0;
 }
@@ -134,7 +180,7 @@ int mask_xor_crypt(char* message){
 
     int length;
     char* mask;
-    if(message!=NULL){ // appel direct
+    if(message!=NULL){ // Utilisation normal
         length = strlen(message);
 
         // Génération du mask
@@ -154,10 +200,10 @@ int mask_xor_crypt(char* message){
             fprintf(stderr, "mask_xor_uncrypt : went wrong\n");
             return -3;
         }
-    }else{ // appel par le main, config is set
+    }else{ // Lecture dans le fichier config
         
         char* key_path, input_path, output_path;
-        get_config(key_path, input_path, output_path, NULL);
+        get_config(&key_path, &input_path, &output_path, NULL);
 
         struct stat key_s, input_s;
         stat(key_path, &key_s);
@@ -239,8 +285,8 @@ int mask_xor_uncrypt(char* message){
         }
     }else{ // appel par le main, config is set
         
-        char* key_path, input_path, output_path;
-        get_config(key_path, input_path, output_path, NULL);
+        char* key_path = NULL, input_path = NULL, output_path = NULL;
+        get_config(&key_path, &input_path, &output_path, NULL);
 
         struct stat key_s, input_s;
         stat(key_path, &key_s);
