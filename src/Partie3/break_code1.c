@@ -102,7 +102,7 @@ void test_xor(const char *msg) {
       sizes[i] = nbre;
       printf("]\n");
     }
-    FILE *file = fopen("clefs_candidates.txt", "w");
+    FILE *file = fopen("clefs_candidates_c1.txt", "w");
     cartesianProductRecursive(clef, sizes, result, 0, TAILLE_CLEF, file);
     fclose(file);
 }
