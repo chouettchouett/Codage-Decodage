@@ -35,6 +35,7 @@ Dans le cadre de l'UE Projet avancé (automne 2024), nous devons produire un pro
 ### [Partie 1](src/Partie1)
 - `./sym_crypt -i <nom_fichier_message> -o <nom_fichier_chiffré> [-k <clef> | -f <fichier_clé>] -m <nom_methode> [-v vecteur_init]` (nom des méthodes : xor OU mask-crypt OU mask-uncrypt OU cbc-crypt OU cbc-uncrypt)
 - `./crypto_sym -t` : Pour lancer les tests.
+- `./crypto_sym -h` : Pour obtenir une description des fonctionnalités
 
 ### [Partie 2](src/Partie2)
 #### C :
