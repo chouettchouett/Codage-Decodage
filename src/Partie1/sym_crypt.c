@@ -113,7 +113,7 @@ int main(int argc, char* argv[]) {
 -o nom_fichier_chiffré -[k clef | f fichier_clé] -m nom_methode [-v vecteur_init]\n\
 \n Valeurs possibles de nom_methode :\n\
 xor\nmask-crypt\nmask-uncrypt\ncbc-crypt\ncbc-uncrypt\n\nLors de l'utilisation des méthodes cbc-crypt ou cbc-uncrypt,\n\
-il est nécessaire de renseigner un vecteur_init suivant l'argument -v");
+il est nécessaire de renseigner un vecteur_init suivant l'argument -v\n");
         }else{
             fprintf(stderr, WRONG_ARGS);
             return 1;
