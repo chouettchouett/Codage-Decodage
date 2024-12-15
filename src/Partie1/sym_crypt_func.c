@@ -14,7 +14,7 @@
 #define ALPHA_NUM_LENGTH strlen(ALPHA_NUM)-1
 
 const char* MASK_PATH = "./src/Partie1/mask.txt";
-#define CBC_MASK_LENGTH 16
+#define CBC_MASK_LENGTH 256
 
 //Note importante : quand mask_crypt ou cbc_crypt est appelé, les masques précédents sont détruits
     // Ainsi, utiliser un mask_xor puis un cbc_crypt effacera les données du mask_xor
@@ -426,7 +426,7 @@ int cbc_crypt_rec(char* message, FILE* message_fd, char* vector, FILE* encrypted
     for(int i=0; i<CBC_MASK_LENGTH; i++)
         vector[i]=message[i];
 
-    if(message_length!=16) return 0;
+    if(message_length!=CBC_MASK_LENGTH) return 0;
     return cbc_crypt_rec(message, message_fd, vector, encrypted_fd, mask_fd, key_fd);
 }
 
@@ -437,7 +437,7 @@ int cbc_uncrypt_rec(char* message, FILE* encrypted_fd, char* vector, FILE* recov
     char* intermed = malloc(sizeof(char)*(CBC_MASK_LENGTH+1));
     for(int i=0; i<CBC_MASK_LENGTH; i++)
         intermed[i]=message[i];
-
+    
     // Récupération du mask
     char* key;
     if(key_fd==NULL) key = fetch_cbc_mask(mask_fd);
@@ -461,7 +461,7 @@ int cbc_uncrypt_rec(char* message, FILE* encrypted_fd, char* vector, FILE* recov
     for(int i=0; i<CBC_MASK_LENGTH; i++)
         vector[i]=intermed[i];
     free(intermed);
-    if(message_length!=16) return 0;
+    if(message_length!=CBC_MASK_LENGTH) return 0;
     return cbc_uncrypt_rec(message, encrypted_fd, vector, recovered_fd, mask_fd, key_fd);
 }
 
@@ -509,10 +509,8 @@ int cbc_crypt(char* message_filepath, char* init_vector, char* encrypted_filepat
         fprintf(stderr, "cbc_crypt : went wrong\n");
         return -1;
     }
-    
-    printf("dd\n");
+
     cbc_crypt_rec(message, message_fd, vector, encrypted_fd, mask_fd, key_fd);
-    printf("ff\n");
 
     // Libération des ressources
     if( (fclose(message_fd)==-1) 
@@ -573,9 +571,7 @@ int cbc_uncrypt(char* encrypted_filepath, char* init_vector, char* uncrypted_fil
         return -1;
     }
 
-    printf("dd\n");
     cbc_uncrypt_rec(message, encrypted_fd, vector, uncrypted_fd, mask_fd, key_fd);
-    printf("ff\n");
 
     // Libération des ressources
     if( (fclose(encrypted_fd)==-1) 
