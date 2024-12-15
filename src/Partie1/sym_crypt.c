@@ -69,7 +69,7 @@ int main(int argc, char* argv[]) {
         char* output_path = argv[o+1];
         char* init_vector = (v==-1)? NULL : argv[v+1];
         printf("set_config...\n");
-        set_config(key_path, input_path, output_path, init_vector);
+        set_config(key_path, input_path, output_path);
 
         if(k!=-1){
             FILE* fd = fopen(key_path, "wb");
@@ -83,12 +83,10 @@ int main(int argc, char* argv[]) {
             xor(NULL, NULL);
         }else if(strcmp(method, "cbc-crypt")==0){
             printf("cbc-crypt...\n");
-            // TODO : key filepath ?
-            cbc_crypt(NULL, NULL, NULL);
+            cbc_crypt(NULL, init_vector, NULL);
         }else if(strcmp(method, "cbc-uncrypt")==0){
             printf("cbc-uncrypt...\n");
-            // TODO : key filepath ?
-            cbc_uncrypt(NULL, NULL, NULL);
+            cbc_uncrypt(NULL, init_vector, NULL);
         }else if(strcmp(method, "mask-crypt")==0){
             printf("mask-crypt...\n");
             mask_xor_crypt(NULL);
@@ -110,6 +108,12 @@ int main(int argc, char* argv[]) {
             test_cbc_crypt();
             
             printf("\nTous les tests sont réussis.\n");
+        }else if(strcmp("-h", argv[1])==0){
+            printf("./sym_crypt -i nom_fichier_message \
+-o nom_fichier_chiffré -[k clef | f fichier_clé] -m nom_methode [-v vecteur_init]\n\
+\n Valeurs possibles de nom_methode :\n\
+xor\nmask-crypt\nmask-uncrypt\ncbc-crypt\ncbc-uncrypt\n\nLors de l'utilisation des méthodes cbc-crypt ou cbc-uncrypt,\n\
+il est nécessaire de renseigner un vecteur_init suivant l'argument -v");
         }else{
             fprintf(stderr, WRONG_ARGS);
             return 1;
