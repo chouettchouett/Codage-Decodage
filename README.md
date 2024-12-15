@@ -27,14 +27,13 @@ Dans le cadre de l'UE Projet avancé (automne 2024), nous devons produire un pro
 - `list-keys` : donne la liste des clefs générées et disponibles et indique celles qui ont déjà été utilisée.
 - `gen-key <n>` OU `gen-key -dh` : génère une clef de longueur n OU génère une clef en simulant un échange de Diffie-Hellman (-dh).
 - `del-key <n_key>` : supprime la clef n° <n_key>.
-- `encrypt <in> <out> <key> <method : xor OU mask OU cbc> [<vecteurd0 initialisation>]`
-- `decrypt <in> <out> <key> <method : xor OU mask OU cbc> [<vecteurd0 initialisation>]`
-- `crack <in> <out> <length> <dico>`
+- `encrypt <in> <out> <key> <method : xor OU mask OU cbc> [<vecteurd0 initialisation>]` : (non fonctionnel pour le moment)
+- `decrypt <in> <out> <key> <method : xor OU mask OU cbc> [<vecteurd0 initialisation>]` : (non fonctionnel pour le moment)
+- `crack <in> <out> <length> <dico>` : (non fonctionnel pour le moment)
 - `quit`
 
 ### [Partie 1](src/Partie1)
-- `./crypto_sym -i <input> -o <output> -k <key> -m <method : xor OU mask OU cbc> [-v <vect>] [-l <log>]`
-- `./crypto_sym -h` - Pour afficher l'aide.
+- `./sym_crypt -i <nom_fichier_message> -o <nom_fichier_chiffré> [-k <clef> | -f <fichier_clé>] -m <nom_methode> [-v vecteur_init]` (nom des méthodes : xor OU mask-crypt OU mask-uncrypt OU cbc-crypt OU cbc-uncrypt)
 - `./crypto_sym -t` : Pour lancer les tests.
 
 ### [Partie 2](src/Partie2)
@@ -51,3 +50,4 @@ Dans le cadre de l'UE Projet avancé (automne 2024), nous devons produire un pro
 ### [Partie 3](src/Partie3)
 - `./break_code -i <input> -m <method : c1 OU all> -k <key length> [-d <dict>] [-l <log>]`
 - `./break_code -h` - Pour afficher l'aide.
+- `./break_code -t` : Pour lancer les tests.

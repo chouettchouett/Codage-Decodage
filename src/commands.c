@@ -121,6 +121,16 @@ void del_key(int key_to_del, FILE *log_file) {
     print_and_log("Clef supprimée avec succès.\n", false, true, log_file);
 }
 
+// Fonction temporaire pour enlever le warning à la compilation. Sera retiré une fois le lien avec la partie 1 et 3 fonctionnel.
+void temp_funct(char *a1, char *a2, int a3, char *a4, char *a5, FILE *a6) {
+    (void) a1;
+    (void) a2;
+    (void) a3;
+    (void) a4;
+    (void) a5;
+    (void) a6;
+}
+
 void encrypt(char *input, char *output, int key_nb, char *method, char *vect, FILE *log_file) {    
     char *key;
     
@@ -149,6 +159,7 @@ void encrypt(char *input, char *output, int key_nb, char *method, char *vect, FI
 
     free(key);
 
+    temp_funct(input, output, 0, method, vect, NULL);
     //print_and_log("Cryptage effectué avec succès.\n", false, true, log_file);
 }
 
@@ -176,10 +187,12 @@ void decrypt(char *input, char *output, int key_nb, char *method, char *vect, FI
     }
 
     free(key);
-
+    
+    temp_funct(input, output, 0, method, vect, NULL);
     //print_and_log("Décryptage effectué avec succès.\n", false, true, log_file);
 }
 
 void crack(char *input, char *output, int key_length, char *dico, FILE *log_file) {
     printf("Appel crack - Non compatible pour le moment\n");
+    temp_funct(input, output, key_length, dico, NULL, log_file);
 }
