@@ -5,6 +5,47 @@
 #include "../utils/test_utils.h"
 //#include "break_code.h"
 
+//ajout en cathastrophe :
+/**
+ * @brief Analyse les options passées en ligne de commande.
+ * @param argc Nombre d'arguments.
+ * @param argv Tableau des arguments.
+ * @return 0 en cas de succès, -1 en cas d'erreur.
+ */
+int parse_options(int argc, char* argv[]) {
+    if (argc < 2) {
+        fprintf(stderr, "Erreur : Aucun argument fourni. Utilisez -h pour afficher l'aide.\n");
+        return -1;
+    }
+
+    for (int i = 1; i < argc; i++) {
+        if (strcmp(argv[i], "-h") == 0) {
+            printf("Usage : break_code [OPTIONS]\n");
+            printf("  -i fichier    : Fichier à décrypter\n");
+            printf("  -m c1/all     : Méthode de décryptage (c1 ou all)\n");
+            printf("  -k longueur   : Longueur de la clé\n");
+            printf("  -d fichier    : Fichier dictionnaire\n");
+            printf("  -l fichier    : Fichier de log\n");
+            printf("  -h            : Affiche cette aide\n");
+            return 0; // Aide affichée avec succès
+        } else if (strcmp(argv[i], "-i") == 0 && i + 1 < argc) {
+            printf("Option -i : Fichier spécifié : %s\n", argv[++i]);
+        } else if (strcmp(argv[i], "-m") == 0 && i + 1 < argc) {
+            printf("Option -m : Méthode spécifiée : %s\n", argv[++i]);
+        } else if (strcmp(argv[i], "-k") == 0 && i + 1 < argc) {
+            printf("Option -k : Longueur de clé spécifiée : %s\n", argv[++i]);
+        } else if (strcmp(argv[i], "-d") == 0 && i + 1 < argc) {
+            printf("Option -d : Fichier dictionnaire spécifié : %s\n", argv[++i]);
+        } else if (strcmp(argv[i], "-l") == 0 && i + 1 < argc) {
+            printf("Option -l : Fichier de log spécifié : %s\n", argv[++i]);
+        } else {
+            fprintf(stderr, "Erreur : Option inconnue ou argument manquant pour '%s'. Utilisez -h pour l'aide.\n", argv[i]);
+            return -1;
+        }
+    }
+    return 0; // Succès
+}
+
 void test_help_option() {
     printf("=== Test Option -h ===\n");
     char* args[] = {"break_code", "-h", NULL};
