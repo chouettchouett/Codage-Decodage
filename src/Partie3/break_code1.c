@@ -1,134 +1,131 @@
+#define _POSIX_C_SOURCE 200809L
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include "fonctions_annexes.h"
 
-#define TAILLE_CLEF 4 // longueur de la clé
-#define MAX_CARACTERES 62 // nombre de caractères admissibles pour chaque valeur de la clé
+// Fonction qui effectue un chiffrement XOR avec une clé donnée
+void break_code1(const char *msg, const char *cle) {
+    int taille_clef = strlen(cle);  // Longueur de la clé
+    int sizes[taille_clef];        // Tableau pour stocker le nombre de caractères valides par position
+    char result[taille_clef];      // Résultat temporaire pour générer les clés candidates
+    memset(result, 0, sizeof(result)); // Initialise le tableau résultat avec des zéros
 
-char **clef; // tableau permettant de stocker les clés candidates
-int sizes[TAILLE_CLEF]; 
-char result[TAILLE_CLEF];                 
+    int msg_length = strlen(msg);  // Longueur du message original
+    char crypte[msg_length + 1];   // Tableau pour stocker le message chiffré
+    char decrypte[msg_length + 1]; // Tableau pour stocker le message déchiffré
 
-// fonction permettant de vérifier si un caractère est imprimable
-int isAdmissibleChar(int c) {
-  return isalnum(c) || isspace(c) || ispunct(c);
-}
-
-// fonction permettant de générer les caractères admissibles pour chaque indice de la clé
-void clefAdmissible(char *chiffre, char **clef) {
-    char clefCharacters[MAX_CARACTERES] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    int tailleChiffre = strlen(chiffre);
-
-    for (int i = 0; i < TAILLE_CLEF; i++) {
-        int m = 0;
-        for (int k = 0; k < MAX_CARACTERES; k++) {
-            int estValide = 1; 
-            for (int l = 0; estValide && (i + TAILLE_CLEF * l) < tailleChiffre; l++) {
-                if (!isAdmissibleChar(clefCharacters[k] ^ chiffre[i + TAILLE_CLEF * l])) {
-                    estValide = 0; // en cas de caractère invalide, on arrête la boucle et on sort
-                }
-            }
-            if (estValide) {
-                clef[i][m++] = clefCharacters[k]; // on ajoute le caractère valide à l'ensemble clef[i]
-            }
-        }
-    }
-}
-
-
-// fonction pour générer toutes les combinaisons cartésiennes des ensembles admissibles
-void cartesianProductRecursive(char **sets, int *sizes, char *result, int index, int n, FILE*file) {
-    if (index == n) {
-        fwrite(result,sizeof(char),TAILLE_CLEF,file);
-        fputs("\n",file);
-        return;
-    }
-
-    for (int i = 0; i < sizes[index]; i++) {
-        result[index] = sets[index][i];
-        cartesianProductRecursive(sets, sizes, result, index + 1, n,file);
-    }
-}
-
-// fonction xor "ou exclusif"
-void xor(const char *msg, unsigned char* key, char *crypted, int len_msg) {
-
-    int len_key = strlen((char*)key);
-    int index_key = 0;
-    for (int i = 0; i < len_msg; i++){    
-        crypted[i] = msg[i] ^ key[index_key];
-        index_key = (index_key + 1) % len_key;
-    }
-}
-
-// fonction pemettant de tester le xor
-void test_xor(const char *msg) {
-    int msg_length = strlen(msg);
-    char crypte[msg_length + 1];
-    char decrypte[msg_length + 1];
-    int nbre=0;
-
+    // Affichage du message original
     printf("Message d'origine : %s\n", msg);
-    xor(msg, "cleC", crypte, msg_length);
 
+    // Chiffrement du message avec la clé en utilisant XOR
+    xor(msg, (unsigned char *)cle, crypte, msg_length);
+
+    // Affichage du message chiffré sous forme hexadécimale
     printf("Message crypte :");
-    // on crypte le message et on l'affiche en héxadécimal
-    for (size_t i = 0; i < strlen(msg); i++) {
+    for (size_t i = 0; i < msg_length; i++) {
         printf("%02x", (unsigned char)crypte[i]);
     }
     printf("\n");
-    // on décrypte le message 
 
-    xor(crypte, "cleC", decrypte, msg_length);
+    // Ouvrir le fichier "message_crypte.txt" en mode écriture
+    FILE *file_crypte = fopen("message_crypte.txt", "w");
+    if (file_crypte == NULL) {
+        perror("Erreur lors de l'ouverture du fichier de chiffrement");
+        exit(EXIT_FAILURE);
+    }
+
+    // Écrire le message chiffré sous forme hexadécimale dans le fichier
+    for (size_t i = 0; i < msg_length; i++) {
+        fprintf(file_crypte, "%02x", (unsigned char)crypte[i]);
+    }
+    fprintf(file_crypte, "\n");  // Ajoute une nouvelle ligne après le message chiffré
+
+    // Fermer le fichier après l'écriture
+    fclose(file_crypte);
+
+    // Déchiffrement du message pour vérification
+    xor(crypte, (unsigned char *)cle, decrypte, msg_length);
     printf("Message decrypte : %s\n", decrypte);
 
-    clef = (char**)malloc(TAILLE_CLEF*(sizeof(char*)));
-    for (int i=0; i<TAILLE_CLEF;i++){
-      clef[i] = (char*) malloc(MAX_CARACTERES);
+    // Allocation dynamique pour stocker les caractères valides pour chaque position de la clé
+    clef = (char **)malloc(taille_clef * sizeof(char *));
+    for (int i = 0; i < taille_clef; i++) {
+        clef[i] = (char *)calloc(MAX_CARACTERES, sizeof(char)); // Initialise chaque position avec des zéros
     }
-    clefAdmissible(crypte,clef);
-    for (int i = 0; i < TAILLE_CLEF ; i++){
-      nbre=0;
-      printf("clef[%d] : [", i);
-      for (int k = 0; k < MAX_CARACTERES; k++){
-        if (clef[i][k] != '\0'){
-          printf("%c, ",clef[i][k]);
-          nbre++;
+
+    // Génération des caractères valides pour chaque position de la clé
+    clefAdmissible(crypte, clef, taille_clef);
+
+    // Affichage des options valides pour chaque position
+    for (int i = 0; i < taille_clef; i++) {
+        int nbre = 0;
+        printf("clef[%d] : [", i);
+        for (int k = 0; k < MAX_CARACTERES; k++) {
+            if (clef[i][k] != '\0') { // Affiche uniquement les caractères valides
+                printf("%c, ", clef[i][k]);
+                nbre++;
+            }
         }
-      }
-      sizes[i] = nbre;
-      printf("]\n");
+        sizes[i] = nbre; // Enregistre le nombre de caractères valides pour cette position
+        printf("]\n");
     }
+
+    // Ouverture d'un fichier pour sauvegarder toutes les clés candidates
     FILE *file = fopen("clefs_candidates_c1.txt", "w");
-    cartesianProductRecursive(clef, sizes, result, 0, TAILLE_CLEF, file);
+    if (file == NULL) { // Vérification de l'ouverture du fichier
+        perror("Erreur lors de l'ouverture du fichier");
+        exit(EXIT_FAILURE);
+    }
+
+    // Génération du produit cartésien des clés possibles et écriture dans le fichier
+    produitCartesien(clef, sizes, result, 0, taille_clef, file, taille_clef);
+
+    // Fermeture du fichier après l'écriture
     fclose(file);
+
+    // Libération de la mémoire allouée dynamiquement
+    for (int i = 0; i < taille_clef; i++) {
+        free(clef[i]);
+    }
+    free(clef);
 }
 
-
+// Fonction principale
 int main(int argc, char *argv[]) {
-    if (argc != 2){
-      fprintf(stderr, "Usage: %s <texte_non_crypte.txt>\n", argv[0]);
-      exit(1);
+    // Vérifie si les arguments requis sont présents
+    if (argc != 3) {
+        fprintf(stderr, "Usage: %s <texte_non_crypte.txt> <cle>\n", argv[0]);
+        exit(EXIT_FAILURE);
     }
 
-    FILE *fd;
-    ssize_t bytesRead;
-    char msg[1024];
-
-    if ((fd=fopen(argv[1],"r")) == NULL){
-      printf("Echec ouvert fichier\n");
-      exit(EXIT_FAILURE);
+    char *cle = argv[2]; // Récupère la clé depuis les arguments
+    if (strlen(cle) == 0) { // Vérifie que la clé n'est pas vide
+        fprintf(stderr, "Erreur : la clé ne peut pas être vide.\n");
+        exit(EXIT_FAILURE);
     }
 
+    FILE *fd; // Pointeur de fichier pour lire le message
+    char msg[1024]; // Tableau pour stocker le contenu du fichier
+
+    // Ouverture du fichier contenant le message non chiffré
+    if ((fd = fopen(argv[1], "r")) == NULL) {
+        perror("Echec d'ouverture du fichier");
+        exit(EXIT_FAILURE);
+    }
+
+    // Lecture du contenu du fichier
     if (fgets(msg, sizeof(msg), fd) == NULL) {
-        printf("Echec de lecture du fichier\n");
+        perror("Echec de lecture du fichier");
         fclose(fd);
         exit(EXIT_FAILURE);
     }
-    test_xor(msg);
-    fclose(fd);
+    fclose(fd); // Fermeture du fichier après la lecture
+
+    // Appelle la fonction pour casser le code en passant le message et la clé
+    break_code1(msg, cle);
     return 0;
 }
