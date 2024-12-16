@@ -6,6 +6,7 @@ Dans le cadre de l'UE Projet avancé (automne 2024), nous devons produire un pro
 - Des attaques sur un message chiffré (partie 3).
 - Des jeux de tests pour chaque parties.
 
+
 ## Participants
 - [MARCQ Léo](https://github.com/chouettchouett) : tests, visibilité et cohérence.
 - [BARBERO Kylian](https://github.com/kylian-bbo) : programme principal, partie 2, Makefile, README et organisation du dépôt.
@@ -15,7 +16,11 @@ Dans le cadre de l'UE Projet avancé (automne 2024), nous devons produire un pro
 ## Utilisation
 ### [Makefile](Makefile)
 - `make` - Pour compiler le programme complet.
+
+**Note :** la partie 3 a été exclue de la commande "make" dans le dépôt final car elle n'est pas compatible avec le reste du projet.
 - `make partX` - Pour compiler seulement la partie X du programme.
+
+**Note :** la partie 3 ne compile malheureusement pas actuellement.
 - `make clean` - Pour supprimer les fichiers objets, les fichiers temporaires et les exécutables.
 - `make clean_tmp` - Pour supprimer seulement les fichiers objets et les fichiers temporaires.
 
@@ -49,6 +54,8 @@ Dans le cadre de l'UE Projet avancé (automne 2024), nous devons produire un pro
 - `python3 tests_dh_simulation.py` - Pour lancer les tests.
 
 ### [Partie 3](src/Partie3)
-- `./break_code -i <input> -m <method : c1 OU all> -k <key length> [-d <dict>] [-l <log>]`
-- `./break_code -h` - Pour afficher l'aide.
-- `./break_code -t` - Pour lancer les tests.
+~~- `./break_code -i <input> -m <method : c1 OU all> -k <key length> [-d <dict>] [-l <log>]`~~
+
+~~- `./break_code -h` - Pour afficher l'aide.~~
+
+~~- `./break_code -t` - Pour lancer les tests.~~
