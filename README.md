@@ -54,8 +54,17 @@ Dans le cadre de l'UE Projet avancé (automne 2024), nous devons produire un pro
 - `python3 tests_dh_simulation.py` - Pour lancer les tests.
 
 ### [Partie 3](src/Partie3)
+Compiler :
+- gcc break_code1.c fonctions_annexes.c -o break_code1
+- gcc break_code2.c -o break_code2
+- gcc break_code3.c fonctions_annexes.c tad_liste.c -o break_code3
+
+Exécuter :
+- ./break_code1 <texte_clair.txt> <cle>
+- ./break_code2 <langue_destination>
+- ./break_code3 <dictionnaire_destination> <message_crypté> <clefs_candidates_c2.txt>
+
+
 ~~- `./break_code -i <input> -m <method : c1 OU all> -k <key length> [-d <dict>] [-l <log>]`~~
-
 ~~- `./break_code -h` - Pour afficher l'aide.~~
-
 ~~- `./break_code -t` - Pour lancer les tests.~~
