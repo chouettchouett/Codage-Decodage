@@ -20,7 +20,7 @@ Dans le cadre de l'UE Projet avancé (automne 2024), nous devons produire un pro
 **Note :** la partie 3 a été exclue de la commande "make" dans le dépôt final car elle n'est pas compatible avec le reste du projet.
 - `make partX` - Pour compiler seulement la partie X du programme.
 
-**Note :** la partie 3 ne compile malheureusement pas actuellement.
+**Note :** la partie 3 ne compile pas par la Makefile actuellement (voir *Partie 3* plus bas).
 - `make clean` - Pour supprimer les fichiers objets, les fichiers temporaires et les exécutables.
 - `make clean_tmp` - Pour supprimer seulement les fichiers objets et les fichiers temporaires.
 
@@ -38,7 +38,9 @@ Dans le cadre de l'UE Projet avancé (automne 2024), nous devons produire un pro
 - `quit`
 
 ### [Partie 1](src/Partie1)
-- `./sym_crypt -i <nom_fichier_message> -o <nom_fichier_chiffré> [-k <clef> | -f <fichier_clé>] -m <nom_methode> [-v vecteur_init]` - (nom des méthodes : xor OU mask-crypt OU mask-uncrypt OU cbc-crypt OU cbc-uncrypt)
+- `./sym_crypt -i <nom_fichier_message> -o <nom_fichier_chiffré> [-k <clef> | -f <fichier_clé>] -m <nom_methode> [-v vecteur_init]`
+
+**Note :** nom des méthodes possibles : xor OU mask-crypt OU mask-uncrypt OU cbc-crypt OU cbc-uncrypt
 - `./crypto_sym -t` - Pour lancer les tests.
 - `./crypto_sym -h` - Pour obtenir une description des fonctionnalités.
 
@@ -54,17 +56,12 @@ Dans le cadre de l'UE Projet avancé (automne 2024), nous devons produire un pro
 - `python3 tests_dh_simulation.py` - Pour lancer les tests.
 
 ### [Partie 3](src/Partie3)
-Compiler :
-- gcc break_code1.c fonctions_annexes.c -o break_code1
-- gcc break_code2.c -o break_code2
-- gcc break_code3.c fonctions_annexes.c tad_liste.c -o break_code3
+#### Pour compiler (depuis le répertoire de la partie 3) :
+- `gcc break_code1.c fonctions_annexes.c -o break_code1`
+- `gcc break_code2.c -o break_code2`
+- `gcc break_code3.c fonctions_annexes.c tad_liste.c -o break_code3`
 
-Exécuter :
-- ./break_code1 <texte_clair.txt> <cle>
-- ./break_code2 <langue_destination>
-- ./break_code3 <dictionnaire_destination> <message_crypté> <clefs_candidates_c2.txt>
-
-
-~~- `./break_code -i <input> -m <method : c1 OU all> -k <key length> [-d <dict>] [-l <log>]`~~
-~~- `./break_code -h` - Pour afficher l'aide.~~
-~~- `./break_code -t` - Pour lancer les tests.~~
+#### Pour exécuter (depuis le répertoire de la partie 3) :
+- `./break_code1 <texte_clair.txt> <cle>`
+- `./break_code2 <langue_destination>`
+- `./break_code3 <dictionnaire_destination> <message_crypté> <clefs_candidates_c2.txt>`
